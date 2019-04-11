@@ -1,0 +1,65 @@
+{
+  "builders": [
+    {
+      "access_key": "{{user `aws_access_key`}}",
+      "ami_description": "{{user `name`}} AMI",
+      "ami_name": "{{user `name`}} {{timestamp}}",
+      "associate_public_ip_address": true,
+      "instance_type": "t2.micro",
+      "name": "{{user `name`}}",
+      "region": "us-east-1",
+      "run_tags": {
+        "ami-create": "{{user `name`}}"
+      },
+      "secret_key": "{{user `aws_secret_key`}}",
+      "source_ami": "{{user `base_ami`}}",
+      "ssh_interface": "public_ip",
+      "ssh_timeout": "5m",
+      "ssh_username": "{{user `ssh_username`}}",
+      "subnet_id": "",
+      "tags": {
+        "ami": "{{user `name`}}"
+      },
+      "type": "amazon-ebs",
+      "vpc_id": ""
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/bootstrap_docker.sh",
+      "source": "bootstrap_docker.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/cleanup.sh",
+      "source": "cleanup.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/bootstrap_drone.sh",
+      "source": "bootstrap_drone.sh",
+      "type": "file"
+    },
+    {
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "inline": [
+        "cd /tmp",
+        "chmod +x bootstrap_docker.sh",
+        "chmod +x cleanup.sh",
+        "./bootstrap_docker.sh",
+        "./bootstrap_drone.sh",
+        "sleep 10",
+        "./cleanup.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "base_ami": "ami-0fba9b33b5304d8b4",
+    "name": "podchaser-drone-server",
+    "ssh_username": "ubuntu"
+  }
+}
+
