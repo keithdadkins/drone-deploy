@@ -1,0 +1,19 @@
+## OS-X and generic ignores
+.DS_Store
+*/logs
+*/tmp
+*.env
+
+## Vagrant
+.vagrant/
+
+## Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+override.tf
+override.tf.json
+
+## Packer
+packer_cache/
+*.box
