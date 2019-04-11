@@ -7,7 +7,7 @@
       "associate_public_ip_address": true,
       "instance_type": "t2.micro",
       "name": "{{user `name`}}",
-      "region": "us-east-1",
+      "region": "{{user `region`}}",
       "run_tags": {
         "ami-create": "{{user `name`}}"
       },
@@ -31,8 +31,8 @@
       "type": "file"
     },
     {
-      "destination": "/tmp/cleanup.sh",
-      "source": "cleanup.sh",
+      "destination": "/tmp/bootstrap_docker_compose.sh",
+      "source": "bootstrap_docker_compose.sh",
       "type": "file"
     },
     {
@@ -41,12 +41,24 @@
       "type": "file"
     },
     {
+      "destination": "/tmp/cleanup.sh",
+      "source": "cleanup.sh",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "DRONE_VERSION={{user `drone_version`}}",
+        "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}"
+      ],
       "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "inline": [
         "cd /tmp",
         "chmod +x bootstrap_docker.sh",
+        "chmod +x bootstrap_docker_compose.sh",
+        "chmod +x bootstrap_drone.sh",
         "chmod +x cleanup.sh",
         "./bootstrap_docker.sh",
+        "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
         "sleep 10",
         "./cleanup.sh"
@@ -59,7 +71,10 @@
     "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
     "base_ami": "ami-0fba9b33b5304d8b4",
     "name": "podchaser-drone-server",
-    "ssh_username": "ubuntu"
+    "ssh_username": "ubuntu",
+    "region": "us-east-1",
+    "drone_version": "1.0.7",
+    "docker_compose_version": "1.24.0"
   }
 }
 
