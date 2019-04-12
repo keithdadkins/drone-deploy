@@ -31,6 +31,9 @@ steps:
   image: alpine
   commands:
   - echo "deploying"
+  trigger:
+    branch:
+    - master
 
 depends_on:
 - build-ami
