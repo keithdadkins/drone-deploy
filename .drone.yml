@@ -1,6 +1,12 @@
 kind: pipeline
 name: build-ami
 
+trigger:
+  branch:
+  - master
+  event:
+  - push
+
 steps:
 - name: ami-builder
   image: hashicorp/packer:light
@@ -17,26 +23,22 @@ steps:
   - cd packer
   - packer build -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY -var base_ami=$BASE_AMI -var drone_version=$DRONE_VERSION -var drone_image=$DRONE_IMAGE -var docker_compose_version=$DOCKER_COMPOSE_VERSION podchaser_drone_server_ami.json
   - cat manifest.json
-  trigger:
-    branch:
-    - master
-    event:
-    - push
 
 ---
 kind: pipeline
 name: deploy-drone
+
+trigger:
+  branch:
+  - master
+  event:
+  - push
 
 steps:
 - name: drone-deployer
   image: alpine
   commands:
   - echo "deploying"
-  trigger:
-    branch:
-    - master
-    event:
-    - push
 
 depends_on:
 - build-ami
