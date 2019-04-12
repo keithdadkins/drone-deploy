@@ -15,9 +15,9 @@ steps:
       from_secret: AWS_SECRET_ACCESS_KEY
   commands:
   - cd packer
-  - build=$(packer build -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY -var base_ami=$BASE_AMI -var drone_version=$DRONE_VERSION -var drone_image=$DRONE_IMAGE -var docker_compose_version=$DOCKER_COMPOSE_VERSION podchaser_drone_server_ami.json | tee /dev/stdout)
-  - echo "get new ami"
-  - echo "set new ami somewhere for other buildsteps"
+  - packer build -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY -var base_ami=$BASE_AMI -var drone_version=$DRONE_VERSION -var drone_image=$DRONE_IMAGE -var docker_compose_version=$DOCKER_COMPOSE_VERSION podchaser_drone_server_ami.json
+  - ami_id=$(cat manifest.json | jq -r '.builds[-1].artifact_id' |  cut -d':' -f2)
+  - echo $ami_id
   trigger:
     branch:
     - master
