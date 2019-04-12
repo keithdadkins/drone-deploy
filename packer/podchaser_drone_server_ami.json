@@ -1,6 +1,8 @@
 {
   "builders": [
     {
+      "type": "amazon-ebs",
+      "vpc_id": "",
       "access_key": "{{user `aws_access_key`}}",
       "ami_description": "{{user `name`}} AMI",
       "ami_name": "{{user `name`}} {{timestamp}}",
@@ -19,9 +21,7 @@
       "subnet_id": "",
       "tags": {
         "ami": "{{user `name`}}"
-      },
-      "type": "amazon-ebs",
-      "vpc_id": ""
+      }
     }
   ],
   "provisioners": [
