@@ -1,0 +1,33 @@
+kind: pipeline
+name: build-ami
+
+steps:
+- name: ami-builder
+  image: hashicorp/packer:light
+  environment:
+    BASE_AMI: ami-0fba9b33b5304d8b4
+    DRONE_VERSION: "1.0.7"
+    DRONE_IMAGE=drone/drone: 1
+    DOCKER_COMPOSE_VERSION: "1.24.0"
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  commands:
+  - cd packer
+  - build=$(packer build -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY -var base_ami=$BASE_AMI -var drone_version=$DRONE_VERSION -var drone_image=$DRONE_IMAGE -var docker_compose_version=$DOCKER_COMPOSE_VERSION podchaser_drone_server_ami.json)
+  - echo "get new ami"
+  - echo "set new ami somewhere for other buildsteps"
+
+---
+kind: pipeline
+name: deploy-drone
+
+steps:
+- name: drone-deployer
+  image: alpine
+  commands:
+  - echo "deploying"
+
+depends_on:
+- build-ami
