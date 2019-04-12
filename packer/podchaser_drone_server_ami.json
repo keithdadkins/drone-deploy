@@ -48,6 +48,7 @@
     {
       "environment_vars": [
         "DRONE_VERSION={{user `drone_version`}}",
+        "DRONE_IMAGE={{user `drone_image`}}",
         "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}"
       ],
       "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
@@ -74,7 +75,7 @@
     "ssh_username": "ubuntu",
     "region": "us-east-1",
     "drone_version": "1.0.7",
+    "drone_image": "drone/drone:1",
     "docker_compose_version": "1.24.0"
   }
 }
-

@@ -8,6 +8,7 @@ sudo apt-get install -y \
     ca-certificates \
     curl \
     wget \
+    git \
     software-properties-common
 
 # add docker's ubuntu repo

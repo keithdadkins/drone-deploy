@@ -20,7 +20,7 @@ Before a build, decide which region you want the ami to reside in and [get the l
 
 You can manually update build defaults by editing the `variables` section in the `podchaser_drone_server_ami.json` build file, and/or overide them by setting the vars from the cli (e.g., `packer -var region=us-west-1 ...`.
 
-For example, you want to deploy Drone version 1.0.7 and you used Ubuntu's ami locator above and found that the latest Ubuntu 18.04LTS AMI id is `ami-0fba9b33b5304d8b4` for the `us-east-1` region. To build the AMI you would run:
+For example, you want to deploy Drone version 1.0.7 and you used Ubuntu's ami locator above and found that the latest Ubuntu 18.04LTS AMI id is `ami-0fba9b33b5304d8b4` for the `us-east-1` region. You also check https://hub.docker.com/r/drone/drone/tags to find the appropriate drone image to use (they do now always sync 1:1). To build the AMI you would run:
 
 ```bash
 cd packer
@@ -28,10 +28,11 @@ packer build \
     -var region=us-east-1 \
     -var base_ami=ami-0fba9b33b5304d8b4 \
     -var drone_version="1.0.7" \
+    -var drone_image="drone/drone:1"
     podchaser_drone_server_ami.json
 ```
 
-The build can take a few minutes, but at the end you should see output similar to the following:
+The build will take a few minutes to complete, but at the end you should see output similar to the following:
 
 ```bash
 ...
@@ -50,7 +51,7 @@ Build 'podchaser-drone-server' finished.
 us-east-1: ami-0c7831ef22e8dc86d
 ```
 
-The bottom line `us-east-1: ami-0c7831ef22e8dc86d` is the AMI we would use to deploy new EC2 instances from. This AMI contains all the current OS updates along with docker, drone, etc.
+At the bottom of the output, you should see a line like: `us-east-1: ami-0c7831ef22e8dc86d`. This is the AMI we will use to deploy new drone instances from. This AMI contains all the current OS updates along with docker, drone, etc.
 
 ## Initial Deployment
 

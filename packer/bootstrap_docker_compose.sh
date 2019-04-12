@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# RELEASE ARE FOUND AT https://github.com/docker/compose/releases
+# RELEASES ARE FOUND AT https://github.com/docker/compose/releases
 
 # INSTALL COMPOSE
 # default to 1.24.0 if env var not set
