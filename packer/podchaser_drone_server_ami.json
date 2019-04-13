@@ -41,6 +41,11 @@
       "type": "file"
     },
     {
+      "destination": "/tmp/build_aws_cli_image.sh",
+      "source": "build_aws_cli_image.sh",
+      "type": "file"
+    },
+    {
       "destination": "/tmp/aws-cli.Dockerfile",
       "source": "aws-cli.Dockerfile",
       "type": "file"
