@@ -7,9 +7,10 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - /var/lib/drone:/var/lib/drone/
+      - /home/ubuntu/drone_data:/data
     restart: always
     environment:
+      - DRONE_DATABASE_DATASOURCE=/data/database.sqlite
       - DRONE_OPEN=false
       - DRONE_USER_FILTER=${DRONE_USER_FILTER}
       - DRONE_SERVER_HOST=${DRONE_SERVER_HOST}
