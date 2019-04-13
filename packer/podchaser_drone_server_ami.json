@@ -81,7 +81,7 @@
     "name": "podchaser-drone-server",
     "ssh_username": "ubuntu",
     "region": "us-east-1",
-    "drone_version": "1.0.7",
+    "drone_version": "1.0.8",
     "drone_image": "drone/drone:1",
     "docker_compose_version": "1.24.0"
   }
