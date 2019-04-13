@@ -101,14 +101,14 @@
         "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
         "./build_aws_cli_image.sh",
-        "sleep 10",
-        "./cleanup.sh",
-        "mv drone.service /etc/systemd/system/",
-        "mv drone_reload.service /etc/systemd/system/",
         "mv docker-compose.yaml /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
+        "mv drone.service /etc/systemd/system/",
+        "mv drone_reload.service /etc/systemd/system/",
         "chown root:root /etc/systemd/system/drone.service",
-        "chown root:root /etc/systemd/system/drone_reload.service"
+        "chown root:root /etc/systemd/system/drone_reload.service",
+        "wait",
+        "./cleanup.sh"
       ],
       "type": "shell"
     }
