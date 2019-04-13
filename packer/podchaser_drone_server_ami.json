@@ -59,7 +59,9 @@
       "environment_vars": [
         "DRONE_VERSION={{user `drone_version`}}",
         "DRONE_IMAGE={{user `drone_image`}}",
-        "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}"
+        "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}",
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}"
       ],
       "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "inline": [
