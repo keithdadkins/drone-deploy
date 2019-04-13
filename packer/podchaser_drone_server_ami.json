@@ -66,17 +66,17 @@
       "type": "file"
     },
     {
-      "destination": "/home/ubuntu/docker-compose.yaml",
+      "destination": "/tmp/docker-compose.yaml",
       "source": "docker-compose.yaml",
       "type": "file"
     },
     {
-      "destination": "/etc/systemd/system/drone.service",
+      "destination": "/tmp/drone.service",
       "source": "drone.service",
       "type": "file"
     },
     {
-      "destination": "/etc/systemd/system/drone_reload.service",
+      "destination": "/tmp/drone_reload.service",
       "source": "drone_reload.service",
       "type": "file"
     },    
@@ -103,6 +103,9 @@
         "./build_aws_cli_image.sh",
         "sleep 10",
         "./cleanup.sh",
+        "mv drone.service /etc/systemd/system/",
+        "mv drone_reload.service /etc/systemd/system/",
+        "mv docker-compose.yaml /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
         "chown root:root /etc/systemd/system/drone.service",
         "chown root:root /etc/systemd/system/drone_reload.service"
