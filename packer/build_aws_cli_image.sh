@@ -2,6 +2,7 @@
 # Builds an aws-cli docker image that we can use during builds
 AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-0}
 AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-0}
+AWS_CLI_BASE_IMAGE=${AWS_CLI_BASE_IMAGE:-}
 
 # fail if credentials are not set
 [ "${AWS_ACCESS_KEY_ID}" -eq "0" ] && echo "no AWS_ACCESS_KEY_ID found.. exiting." && exit 1
@@ -17,7 +18,7 @@ failed_test(){
 }
 
 # build image
-sudo docker build -f aws-cli.Dockerfile -t aws-cli .
+sudo docker build -f aws-cli.Dockerfile -t aws-cli --build-arg CLI_BASE_IMAGE=${AWS_CLI_BASE_IMAGE} .
 
 # test aws-cli
 sudo docker run --rm -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" aws-cli sts get-caller-identity > /dev/null 2>&1

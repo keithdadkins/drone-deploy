@@ -61,7 +61,8 @@
         "DRONE_IMAGE={{user `drone_image`}}",
         "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}",
         "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
-        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}"
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}",
+        "AWS_CLI_BASE_IMAGE={{user `aws_cli_base_image`}}"
       ],
       "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "inline": [
@@ -97,6 +98,7 @@
     "region": "us-east-1",
     "drone_version": "1.0.8",
     "drone_image": "drone/drone:1",
-    "docker_compose_version": "1.24.0"
+    "docker_compose_version": "1.24.0",
+    "aws_cli_base_image": "python:3.7"
   }
 }
