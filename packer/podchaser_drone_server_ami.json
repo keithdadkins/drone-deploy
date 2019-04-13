@@ -41,6 +41,11 @@
       "type": "file"
     },
     {
+      "destination": "/tmp/aws-cli.Dockerfile",
+      "source": "aws-cli.Dockerfile",
+      "type": "file"
+    },
+    {
       "destination": "/tmp/cleanup.sh",
       "source": "cleanup.sh",
       "type": "file"
@@ -57,10 +62,12 @@
         "chmod +x bootstrap_docker.sh",
         "chmod +x bootstrap_docker_compose.sh",
         "chmod +x bootstrap_drone.sh",
+        "chmod +x build_aws_cli_image.sh",
         "chmod +x cleanup.sh",
         "./bootstrap_docker.sh",
         "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
+        "./build_aws_cli_image.sh",
         "sleep 10",
         "./cleanup.sh"
       ],
