@@ -14,7 +14,15 @@
         "ami-create": "{{user `name`}}"
       },
       "secret_key": "{{user `aws_secret_key`}}",
-      "source_ami": "{{user `base_ami`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
       "ssh_interface": "public_ip",
       "ssh_timeout": "5m",
       "ssh_username": "{{user `ssh_username`}}",
@@ -94,7 +102,6 @@
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-    "base_ami": "ami-0fba9b33b5304d8b4",
     "name": "podchaser-drone-server",
     "ssh_username": "ubuntu",
     "region": "us-east-1",
