@@ -1,3 +1,5 @@
+[![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone.podchaser.com/status.svg)](https://drone.keithdadkins.me/keithdadkins/drone.podchaser.com)
+
 # podchaser-drone-ami-builder
 
 This projects builds and deploys https://drone.podchaser.com CI/CD system using Drone.io
