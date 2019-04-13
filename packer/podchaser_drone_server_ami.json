@@ -20,7 +20,9 @@
       "ssh_username": "{{user `ssh_username`}}",
       "subnet_id": "",
       "tags": {
-        "ami": "{{user `name`}}"
+        "Drone": "drone-{{user `drone_version`}}",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}"
       }
     }
   ],
