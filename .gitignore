@@ -17,3 +17,4 @@ override.tf.json
 ## Packer
 packer_cache/
 *.box
+manifest.json
