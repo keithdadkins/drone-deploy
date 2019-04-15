@@ -1,13 +1,52 @@
 [![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone.podchaser.com/status.svg?ref=refs/heads/master)](https://drone.keithdadkins.me/keithdadkins/drone.podchaser.com)
 
-# podchaser-drone-ami-builder
+# Drone Deployer
 
-This projects builds and deploys https://drone.podchaser.com CI/CD system using Drone.io
+This projects builds, deploys, and maintains a [Drone.io](https://drone.io) CI/CD installation on AWS.
 
-## Requirements to run locally
+## Setup
 
-> - [packer](https://www.packer.io) - IaC tool used to build the drone server AWS AMI
-> - [terraform](https://www.terraform.io) - IaC tool used to deploy and manage AWS resources
+Since we will be using drone to deploy and manage updates to itself (e.g., `.drone.yml`); but before we can do that, we must __bootstrap__ an initial drone instance. This needs to be run locally and only needs to be done once.
+
+### Prerequisites
+
+__AWS__
+
+TODO: Setup IAM policies and roles for drone deployer.
+TODO: Setup roles to only allow the drone deployer to managed resources with specific tags.
+
+### Bootstrap Requirements
+
+We make heavy use of [packer](https://www.packer.io), [terraform](https://www.terraform.io), [Python3](https://www.python.org) and [Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html for building and deploying drone; however, we run these tools inside docker containers to keep local dependencies down to a minimum. Therefore, the only requirements for __*bootstrapping*__ drone is:
+
+  > `git` for cloning this repo
+  > A modern bash implementation (for running `./bootstrap-drone.sh`)
+  > Docker and an internet connection (tested using Docker CE 18.09)
+
+Once the initial drone server is bootstrapped, further drone updates, upgrades, etc is made by editing the local `.drone.yml` file + `git push` from the `master` branch. Which, by default, requires you to authorize the build from the drone gui or cli tool.
+
+### Drone Management Requirements
+
+Once the system has been bootstrapped, you can use the web gui (e.g., https://youdrone.yourdomain.com), or the `drone` cli for approving builds, viewing logs, enabling repos, etc.
+
+#### Installing the `drone` cli
+
+See [https://docs.drone.io/cli/install/](https://docs.drone.io/cli/install/) for up-to-date instructions on installing the cli.
+
+### System Architecture
+
+Drone consists of *server* and one or more build *agents*. The drone server, build agents, and all build pipelines are run in docker containers. The build agents communicate with the server via rpc (tcp).
+
+#### server
+
+The drone server manages authentication, sending builds to agents, and stores build logs, etc. 
+
+We use `packer` to build the drone server image.
+
+## Requirements
+
+> -  - IaC tool used to build the drone server AWS AMI
+> -  - IaC tool used to deploy and manage AWS resources
 
 ## The podchaser-drone-server Server AMI
 
