@@ -18,10 +18,16 @@ steps:
       from_secret: AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
-  commands:
-  - cd packer
-  - packer build -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY -var drone_version=$DRONE_VERSION -var drone_image=$DRONE_IMAGE -var docker_compose_version=$DOCKER_COMPOSE_VERSION podchaser_drone_server_ami.json
-  - cat manifest.json
+  commands: |
+    cd packer
+    packer build \
+      -var aws_access_key=$AWS_ACCESS_KEY_ID \
+      -var aws_secret_key=$AWS_SECRET_ACCESS_KEY \
+      -var drone_version=$DRONE_VERSION \
+      -var drone_image=$DRONE_IMAGE \
+      -var docker_compose_version=$DOCKER_COMPOSE_VERSION \
+      podchaser_drone_server_ami.json
+    cat manifest.json
 
 ---
 kind: pipeline

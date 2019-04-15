@@ -61,11 +61,6 @@
       "type": "file"
     },
     {
-      "destination": "/tmp/cleanup.sh",
-      "source": "cleanup.sh",
-      "type": "file"
-    },
-    {
       "destination": "/tmp/docker-compose.yaml",
       "source": "docker-compose.yaml",
       "type": "file"
@@ -80,6 +75,11 @@
       "source": "drone_reload.service",
       "type": "file"
     },    
+    {
+      "destination": "/tmp/cleanup.sh",
+      "source": "cleanup.sh",
+      "type": "file"
+    },
     {
       "environment_vars": [
         "DRONE_VERSION={{user `drone_version`}}",
