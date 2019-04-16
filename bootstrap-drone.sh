@@ -22,11 +22,6 @@ DRONE_AWS_SECRET_ACCESS_KEY=${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}
 AWS_REGION=${AWS_REGION:-us-east-1}
 DRONE_VPC_ID=${DRONE_VPC_ID:-}
 
-# load settings from .env file if present
-if [ -f ".env" ]; then
-    source .env
-fi
-
 ##### SETUP DOCKER + AWS-CLI|PACKER|TERRAFORM COMMAND IMAGES ############################
 # set $docker_cmd (use sudo if root) and make sure docker is running
 printf "Checking docker... "
