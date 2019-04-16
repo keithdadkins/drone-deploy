@@ -3,7 +3,15 @@ FROM $CLI_BASE_IMAGE
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y awscli && \
-    rm -rf /var/cache/apt/*
+    apt-get install -y \
+        awscli \
+        jq \
+        openssl \
+        && \
+        rm -rf /var/cache/apt/*
 
-ENTRYPOINT ["aws"]
+COPY aws-cli-entrypoint-script.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && \
+    ln -s usr/local/bin/entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]

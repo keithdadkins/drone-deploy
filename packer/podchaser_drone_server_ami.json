@@ -11,7 +11,8 @@
       "name": "{{user `name`}}",
       "region": "{{user `region`}}",
       "run_tags": {
-        "ami-create": "{{user `name`}}"
+        "ami-create": "{{user `name`}}",
+        "drone-deployment-id": "{{user `drone_deployment_uuid`}}"
       },
       "secret_key": "{{user `aws_secret_key`}}",
       "source_ami_filter": {
@@ -30,7 +31,8 @@
       "tags": {
         "Drone": "drone-{{user `drone_version`}}",
         "Base_AMI_Name": "{{ .SourceAMIName }}",
-        "Extra": "{{ .SourceAMITags.TagName }}"
+        "Extra": "{{ .SourceAMITags.TagName }}",
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
       }
     }
   ],
@@ -58,6 +60,11 @@
     {
       "destination": "/tmp/aws-cli.Dockerfile",
       "source": "aws-cli.Dockerfile",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/aws-cli-entrypoint-script.sh",
+      "source": "aws-cli-entrypoint-script.sh",
       "type": "file"
     },
     {
@@ -117,18 +124,22 @@
     {
       "type": "manifest",
       "output": "manifest.json",
-      "strip_path": true
+      "strip_path": true,
+      "custom_data": {
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
+      }
     }
   ],
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-    "name": "podchaser-drone-server",
+    "name": "drone-server-ami",
     "ssh_username": "ubuntu",
     "region": "us-east-1",
     "drone_version": "1.0.8",
     "drone_image": "drone/drone:1",
     "docker_compose_version": "1.24.0",
-    "aws_cli_base_image": "python:3.7"
+    "aws_cli_base_image": "python:3.7",
+    "drone_deployment_uuid": ""
   }
 }

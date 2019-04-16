@@ -10,8 +10,7 @@ sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERS
 sudo chmod +x /usr/local/bin/docker-compose
 
 # install bash-completion
-sudo curl -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+sudo curl -L "https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose" -o /etc/bash_completion.d/docker-compose
 
 # test install
-ver=$(docker-compose --version > /dev/null 2>&1)
-[ $? -eq 0 ] && echo "installed docker-compose" || exit 1
+docker-compose --version > /dev/null 2>&1 && echo "installed docker-compose" || exit 1
