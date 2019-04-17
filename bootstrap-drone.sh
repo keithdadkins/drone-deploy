@@ -134,18 +134,19 @@ build_drone_server_ami(){
 
 # get the latest ami id from packer/manifest.json (generated during builds)
 get_latest_ami_id(){
-    #TODO: make sure packer_run_uuid matches last_run_uuid
     local ami_id=
     local last_run_uuid=
     local current_run_uuid=
     ami_id=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].artifact_id' |  cut -d':' -f2")
     last_run_uuid=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.last_run_uuid' |  cut -d':' -f2")
     current_run_uuid=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].packer_run_uuid' |  cut -d':' -f2")
-    if "$last_run_uuid" != "$current_run_uuid"; then
+    
+    # make sure last and current run uuid's match in packer/manifest.json
+    if [ "$last_run_uuid" == "$current_run_uuid" ]; then
+        echo "$ami_id"
+    else
         echo "ERROR: packer/manifest.json's last_run_uuid and packer_run_uuid should match... exiting."
         return 1
-    else
-        echo "$ami_id"
     fi
 }
 
