@@ -1,0 +1,11 @@
+drone.keithdadkins.me:443 {
+    tls keithdadkins@me.com
+
+    gzip {
+        not /api/
+    }
+    proxy / drone-server:80 {
+        websocket
+        transparent
+    }
+}

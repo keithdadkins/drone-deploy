@@ -83,7 +83,12 @@
       "destination": "/tmp/drone_reload.service",
       "source": "drone_reload.service",
       "type": "file"
-    },    
+    },
+    {
+      "destination": "/tmp/Caddyfile",
+      "source": "Caddyfile",
+      "type": "file"
+    },
     {
       "destination": "/tmp/cleanup.sh",
       "source": "cleanup.sh",
@@ -110,6 +115,8 @@
         "./build_aws_cli_image.sh",
         "mv docker-compose.yaml /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
+        "mv Caddyfile /home/ubuntu/",
+        "chown ubuntu:ubuntu /home/ubuntu/Caddyfile",
         "mv drone.service /etc/systemd/system/",
         "mv drone_reload.service /etc/systemd/system/",
         "chown root:root /etc/systemd/system/drone.service",
