@@ -4,10 +4,10 @@
 # set -x
 set -euo pipefail
 
-# creds to start the bootstrap instance with (not implemented yet)
-AWS_REGION="${AWS_REGION:-}"
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
+# creds to start the bootstrap instance with
+# AWS_REGION="${AWS_REGION:-}"
+# AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
+# AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
 unset AWS_SESSION_TOKEN
 
 # drone settings
@@ -18,12 +18,13 @@ DRONE_SERVER_ROLE_ARN="${DRONE_SERVER_ROLE_ARN:-}"
 DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
 
+# defaults for docker images
 AWS_CLI_BASE_IMAGE="${AWS_CLI_BASE_IMAGE:-python:3.7}"
 PACKER_BASE_IMAGE="${PACKER_BASE_IMAGE:-hashicorp/packer:latest}"
 TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:latest}"
 
 
-## utility function to display a spinner when doing long running tasks
+# utility function to display a spinner when doing long running tasks
 show_spinner(){
     local -r pid="${1}"
     local -r delay='0.75'
@@ -40,7 +41,7 @@ show_spinner(){
 }
 
 
-## set the $docker_cmd to use throughout the script (uses sudo if root)
+# set the $docker command to use throughout the script (e.g., uses sudo if run as root)
 get_docker_cmd(){
     local docker_cmd='docker'
     [ "$EUID" -eq 0 ] && docker_cmd="sudo docker"
@@ -50,7 +51,7 @@ get_docker_cmd(){
 
 # pulls a docker image without all the verbose output
 pull_image(){
-    # $1 == docker image path. E.g., 'pull_image "hashicorp/packer:latest"'
+    # $1 == docker image e.g., 'hashicorp/packer:latest'
     printf "    pulling %s ... " "$1"
     ( $docker pull "$1" > /dev/null 2>&1 ) &
     show_spinner "$!"
@@ -74,12 +75,10 @@ build_aws_cli_image(){
 }
 
 
-# assumes DroneBuilder role and exports temp aws credentials
+# assumes the IAM role that Packer uses during AMI creation and exports a set of temp aws credentials that we pass to packer
 generate_build_credentials(){
     # The user running this script must have permissions to assume the DroneBuilder role and
     # permissions to pass the DroneServer role as well. See README.md for more info.
-    # IMPORTANT: You cannot call AssumeRole by using AWS root account credentials; access is denied. 
-    # You must use credentials for an IAM user or an IAM role to call AssumeRole .
     local temp_role=
     temp_role="$(aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name "drone-builder")"
 
@@ -92,14 +91,14 @@ generate_build_credentials(){
 }
 
 
-# sets the appropriate aws command to use with temp aws creds
+# builds a docker command with our temporary aws credentials set as env vars
 get_aws_command(){
     local session_creds="-e AWS_SESSION_TOKEN=$DRONE_BUILDER_AWS_SESSION_TOKEN -e AWS_ACCESS_KEY_ID=$DRONE_BUILDER_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$DRONE_BUILDER_AWS_SECRET_ACCESS_KEY" 
     echo "$docker $session_creds run --rm -it aws-cli -- aws"
 }
 
 
-# generate unique deployment uuid
+# generates a unique deployment uuid
 generate_deployment_uuid(){
     local uuid=
     uuid=$($docker run -it --rm aws-cli /bin/sh -c "openssl rand -hex 16")
@@ -112,7 +111,7 @@ generate_deployment_uuid(){
 }
 
 
-# build the drone server ami (packer)
+# builds the drone server ami using packer
 build_drone_server_ami(){
     echo "Building AMI... "
     packer_build_cmd="$docker run -it --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
@@ -132,7 +131,7 @@ build_drone_server_ami(){
 }
 
 
-# get the latest ami id from packer/manifest.json (generated during builds)
+# gets the latest ami id from ./packer/manifest.json (which is generated during builds)
 get_latest_ami_id(){
     local ami_id=
     local last_run_uuid=
@@ -151,13 +150,13 @@ get_latest_ami_id(){
 }
 
 main(){
-    # set docker command and test
+    # configure our docker command
     docker="$(get_docker_cmd)"
     if ! $docker images > /dev/null 2>&1; then
         $docker info
     fi
 
-    # pull command images
+    # pull command images and build aws-cli
     echo "Prepping bootstrap: "
     pull_image "$AWS_CLI_BASE_IMAGE" && echo "OK"
     pull_image "$PACKER_BASE_IMAGE" && echo "OK"
@@ -167,6 +166,7 @@ main(){
     # generate temp aws credentials
     generate_build_credentials
 
+    # generate a 32 character unique uuid for tagging drone resources
     printf "Generating unique drone-deployment-id: "
     if ! deployment_id=$(generate_deployment_uuid); then
         echo "Unable to generate UUID."
@@ -178,8 +178,7 @@ main(){
 
     # build the server ami
     if build_drone_server_ami; then
-        # get the ami id (ensure manifest.json is synced to disk first). make sure it matches
-        # the ami we just built
+        # get the ami id (ensure manifest.json is synced to disk first) & validate
         sync
         if ! ami_id="$(get_latest_ami_id)"; then
             echo "$ami_id"
