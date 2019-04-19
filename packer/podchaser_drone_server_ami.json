@@ -15,7 +15,7 @@
       "region": "{{user `aws_region`}}",
       "run_tags": {
         "ami-create": "{{user `name`}}",
-        "drone-deployment-id": "{{user `drone_deployment_uuid`}}"
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
       },
       "source_ami_filter": {
         "filters": {
@@ -60,6 +60,11 @@
       "type": "file"
     },
     {
+      "destination": "/tmp/requirements.txt",
+      "source": "requirements.txt",
+      "type": "file"
+    },
+    {
       "destination": "/tmp/aws-cli.Dockerfile",
       "source": "aws-cli.Dockerfile",
       "type": "file"
@@ -90,16 +95,32 @@
       "type": "file"
     },
     {
+      "destination": "/tmp/make_s3_bucket.sh",
+      "source": "make_s3_bucket.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/s3_bucket_policy.json",
+      "source": "s3_bucket_policy.json",
+      "type": "file"
+    },
+    {
       "destination": "/tmp/cleanup.sh",
       "source": "cleanup.sh",
       "type": "file"
     },
     {
       "environment_vars": [
+        "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}",
         "DRONE_VERSION={{user `drone_version`}}",
         "DRONE_IMAGE={{user `drone_image`}}",
-        "DOCKER_COMPOSE_VERSION={{user `docker_compose_version`}}",
-        "AWS_CLI_BASE_IMAGE={{user `aws_cli_base_image`}}"
+        "DRONE_DEPLOYMENT_ID={{user `drone_deployment_uuid`}}",
+        "DRONE_REGION={{user `drone_region`}}",
+        "AWS_REGION={{user `aws_region`}}",
+        "AWS_CLI_BASE_IMAGE={{user `aws_cli_base_image`}}",
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}",
+        "AWS_SESSION_TOKEN={{user `aws_session_token`}}"
       ],
       "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "inline": [
@@ -108,11 +129,13 @@
         "chmod +x bootstrap_docker_compose.sh",
         "chmod +x bootstrap_drone.sh",
         "chmod +x build_aws_cli_image.sh",
+        "chmod +x make_s3_bucket.sh",
         "chmod +x cleanup.sh",
         "./bootstrap_docker.sh",
         "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
         "./build_aws_cli_image.sh",
+        "./make_s3_bucket.sh",
         "mv docker-compose.yaml /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
         "mv Caddyfile /home/ubuntu/",
@@ -141,7 +164,8 @@
     "name": "drone-server-ami",
     "ssh_username": "ubuntu",
     "drone_version": "1.0.8",
-    "drone_image": "drone/drone:1",
+    "drone_image": "drone/drone:latest",
+    "drone_region": "",
     "docker_compose_version": "1.24.0",
     "aws_cli_base_image": "python:3.7",
     "drone_deployment_uuid": "",

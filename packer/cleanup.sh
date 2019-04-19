@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-echo 'Cleaning up after provisioning... '
+
+printf "\n\n\n\n***** CLEANING UP *****\n\n\n\n"
+
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get -y autoremove
 sudo apt-get -y clean

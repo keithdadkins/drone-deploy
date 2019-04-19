@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # installs docker-ce on Ubuntu 18.04 LTS (amd64)
 export DEBIAN_FRONTEND=noninteractive
+
+printf "\n\n\n***** INSTALLING DOCKER *****\n\n\n\n"
+
 sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y \

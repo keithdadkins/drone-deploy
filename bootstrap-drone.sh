@@ -82,9 +82,9 @@ generate_build_credentials(){
     local temp_role=
     temp_role="$(aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name "drone-builder")"
 
-    DRONE_BUILDER_AWS_ACCESS_KEY_ID=$(docker run -it --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.AccessKeyId | xargs")
-    DRONE_BUILDER_AWS_SECRET_ACCESS_KEY=$(docker run -it --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SecretAccessKey | xargs")
-    DRONE_BUILDER_AWS_SESSION_TOKEN=$(docker run -it --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SessionToken | xargs")
+    DRONE_BUILDER_AWS_ACCESS_KEY_ID=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.AccessKeyId | xargs")
+    DRONE_BUILDER_AWS_SECRET_ACCESS_KEY=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SecretAccessKey | xargs")
+    DRONE_BUILDER_AWS_SESSION_TOKEN=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SessionToken | xargs")
     export DRONE_BUILDER_AWS_ACCESS_KEY_ID
     export DRONE_BUILDER_AWS_SECRET_ACCESS_KEY
     export DRONE_BUILDER_AWS_SESSION_TOKEN
@@ -94,14 +94,14 @@ generate_build_credentials(){
 # builds a docker command with our temporary aws credentials set as env vars
 get_aws_command(){
     local session_creds="-e AWS_SESSION_TOKEN=$DRONE_BUILDER_AWS_SESSION_TOKEN -e AWS_ACCESS_KEY_ID=$DRONE_BUILDER_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$DRONE_BUILDER_AWS_SECRET_ACCESS_KEY" 
-    echo "$docker $session_creds run --rm -it aws-cli -- aws"
+    echo "$docker $session_creds run --rm aws-cli -- aws"
 }
 
 
 # generates a unique deployment uuid
 generate_deployment_uuid(){
     local uuid=
-    uuid=$($docker run -it --rm aws-cli /bin/sh -c "openssl rand -hex 16")
+    uuid=$($docker run --rm aws-cli /bin/sh -c "openssl rand -hex 16")
 
     # fail if uuid is not at least 32 chars long
     if (( ${#uuid} < 32 )); then
@@ -114,7 +114,7 @@ generate_deployment_uuid(){
 # builds the drone server ami using packer
 build_drone_server_ami(){
     echo "Building AMI... "
-    packer_build_cmd="$docker run -it --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
+    packer_build_cmd="$docker run --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
 
     # note: ${VARNAME%%[[:cntrl:]]} strings trailing /r's from keys. dang bashism's.
     $packer_build_cmd \
@@ -123,6 +123,7 @@ build_drone_server_ami(){
         -var aws_session_token="${DRONE_BUILDER_AWS_SESSION_TOKEN%%[[:cntrl:]]}" \
         -var drone_deployment_uuid="${DRONE_DEPLOYMENT_ID%%[[:cntrl:]]}" \
         -var aws_region="$DRONE_REGION" \
+        -var drone_region="$DRONE_REGION" \
         -var drone_version="$DRONE_VERSION" \
         -var drone_image="$DRONE_IMAGE" \
         -var docker_compose_version="$DOCKER_COMPOSE_VERSION" \
@@ -136,9 +137,9 @@ get_latest_ami_id(){
     local ami_id=
     local last_run_uuid=
     local current_run_uuid=
-    ami_id=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].artifact_id' |  cut -d':' -f2")
-    last_run_uuid=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.last_run_uuid' |  cut -d':' -f2")
-    current_run_uuid=$($docker run -it --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].packer_run_uuid' |  cut -d':' -f2")
+    ami_id=$($docker run --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].artifact_id' |  cut -d':' -f2")
+    last_run_uuid=$($docker run --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.last_run_uuid' |  cut -d':' -f2")
+    current_run_uuid=$($docker run --rm -v "$(PWD)"/packer/manifest.json:/tmp/manifest.json aws-cli /bin/sh -c "cat /tmp/manifest.json | jq -r '.builds[-1].packer_run_uuid' |  cut -d':' -f2")
     
     # make sure last and current run uuid's match in packer/manifest.json
     if [ "$last_run_uuid" == "$current_run_uuid" ]; then
@@ -149,8 +150,9 @@ get_latest_ami_id(){
     fi
 }
 
+
 main(){
-    # configure our docker command
+    # configure docker command
     docker="$(get_docker_cmd)"
     if ! $docker images > /dev/null 2>&1; then
         $docker info
@@ -174,6 +176,7 @@ main(){
         exit 1
     else
         export DRONE_DEPLOYMENT_ID="$deployment_id"
+        echo "$DRONE_DEPLOYMENT_ID"
     fi
 
     # build the server ami
