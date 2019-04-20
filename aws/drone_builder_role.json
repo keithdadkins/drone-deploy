@@ -1,0 +1,29 @@
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "DroneBuilderRole",
+        "RoleId": "${ROLE_ID}",
+        "Arn": "arn:aws:iam::${ACCOUNT_NUMBER}:role/DroneBuilderRole",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                },
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "arn:aws:iam::${ACCOUNT_NUMBER}:user/${USER_NAME}"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        },
+        "Description": "Allows EC2 instances to call AWS services on your behalf.",
+        "MaxSessionDuration": 3600
+    }
+}
