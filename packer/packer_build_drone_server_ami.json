@@ -41,62 +41,62 @@
   "provisioners": [
     {
       "destination": "/tmp/bootstrap_docker.sh",
-      "source": "bootstrap_docker.sh",
+      "source": "build-scripts/bootstrap_docker.sh",
       "type": "file"
     },
     {
       "destination": "/tmp/bootstrap_docker_compose.sh",
-      "source": "bootstrap_docker_compose.sh",
+      "source": "build-scripts/bootstrap_docker_compose.sh",
       "type": "file"
     },
     {
       "destination": "/tmp/bootstrap_drone.sh",
-      "source": "bootstrap_drone.sh",
+      "source": "build-scripts/bootstrap_drone.sh",
       "type": "file"
     },
     {
       "destination": "/tmp/build_aws_cli_image.sh",
-      "source": "build_aws_cli_image.sh",
+      "source": "build-scripts/build_aws_cli_image.sh",
       "type": "file"
     },
     {
       "destination": "/tmp/requirements.txt",
-      "source": "requirements.txt",
+      "source": "aws-cli/requirements.txt",
       "type": "file"
     },
     {
       "destination": "/tmp/aws-cli.Dockerfile",
-      "source": "aws-cli.Dockerfile",
+      "source": "aws-cli/aws-cli.Dockerfile",
       "type": "file"
     },
     {
       "destination": "/tmp/aws-cli-entrypoint-script.sh",
-      "source": "aws-cli-entrypoint-script.sh",
+      "source": "aws-cli/aws-cli-entrypoint-script.sh",
       "type": "file"
     },
     {
       "destination": "/tmp/docker-compose.yaml",
-      "source": "docker-compose.yaml",
+      "source": "drone-server-configs/docker-compose.yaml",
       "type": "file"
     },
     {
       "destination": "/tmp/drone.service",
-      "source": "drone.service",
+      "source": "drone-server-configs/drone.service",
       "type": "file"
     },
     {
       "destination": "/tmp/drone_reload.service",
-      "source": "drone_reload.service",
+      "source": "drone-server-configs/drone_reload.service",
       "type": "file"
     },
     {
       "destination": "/tmp/Caddyfile",
-      "source": "Caddyfile",
+      "source": "drone-server-configs/Caddyfile",
       "type": "file"
     },
     {
       "destination": "/tmp/make_s3_bucket.sh",
-      "source": "make_s3_bucket.sh",
+      "source": "build-scripts/make_s3_bucket.sh",
       "type": "file"
     },
     {
@@ -106,7 +106,7 @@
     },
     {
       "destination": "/tmp/cleanup.sh",
-      "source": "cleanup.sh",
+      "source": "build-scripts/cleanup.sh",
       "type": "file"
     },
     {
@@ -156,7 +156,8 @@
       "output": "manifest.json",
       "strip_path": true,
       "custom_data": {
-        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}",
+        "builder_arn": ""
       }
     }
   ],
