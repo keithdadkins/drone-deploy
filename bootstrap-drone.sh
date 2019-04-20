@@ -41,7 +41,6 @@ error_exit(){
 }
 
 graceful_exit(){
-    echo "Don't forget to commit the build manifest to git (./packer/manifest.json) for reference."
     clean_up && exit 
 }
 
