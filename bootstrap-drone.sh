@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-# bootsraps an initial drone server. drone will subsequently 
-# be used to build and deploy updates after that.
-# set -x
-set -euo pipefail
+# Builds and bootstraps the drone server amazon machine image.
+# Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--purge]
 
-# creds to start the bootstrap instance with
-# AWS_REGION="${AWS_REGION:-}"
-# AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
-# AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
+set -euo pipefail
 unset AWS_SESSION_TOKEN
 
 # drone settings
@@ -22,6 +17,65 @@ DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
 AWS_CLI_BASE_IMAGE="${AWS_CLI_BASE_IMAGE:-python:3.7}"
 PACKER_BASE_IMAGE="${PACKER_BASE_IMAGE:-hashicorp/packer:latest}"
 TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:latest}"
+
+# cli options
+# PURGE == remove docker images at end
+# REBUILD == rebuild docker images from scratch
+PURGE="false"
+REBUILD="false"
+
+#### basic shell functions (error trapping, handeling, arg parsing)
+clean_up() {
+    if [ "$PURGE" == "true" ]; then
+        echo "Removing docker images... "
+        $docker rmi "$AWS_CLI_BASE_IMAGE"
+        $docker rmi "$PACKER_BASE_IMAGE"
+        $docker rmi "$TERRAFORM_BASE_IMAGE"
+    fi
+    # TODO check for orphaned ec2 resources
+    # TODO check for orphaned containers
+}
+
+error_exit(){
+    clean_up && exit 1 
+}
+
+graceful_exit(){
+    echo "Don't forget to commit the build manifest to git (./packer/manifest.json) for reference."
+    clean_up && exit 
+}
+
+# handle trapped os signals
+signal_exit(){
+    case $1 in
+        INT) error_exit "Build interrupted by user." ;;
+        TERM) graceful_exit ;;
+        *) error_exit ;;
+    esac
+}
+
+usage() {
+    echo -e "Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--purge]"
+}
+
+help_message() {
+    cat <<- _EOF_
+    bootstrap-drone.sh
+    builds and bootstraps a drone-server AMI on AWS.
+    $(usage)
+
+    Options:
+    -h, --help  Display this help message and exit.
+    -n, --no-cache  Don't use cached images. Rebuild from scratch.
+    -p, --purge  Remove docker images downloaded/created during the build.
+
+_EOF_
+    return
+}
+
+# trap signals
+trap "signal_exit TERM" TERM HUP
+trap "signal_exit INT"  INT
 
 
 # utility function to display a spinner when doing long running tasks
@@ -60,13 +114,15 @@ pull_image(){
 
 # builds the aws-cli image for running commands (see packer/aws-cli.Dockerfile)
 build_aws_cli_image(){
-    if $docker images | grep 'aws-cli' > /dev/null 2>&1; then
+    # rebuild if --no-cache is set
+    if [ "$REBUILD" == "false" ] && $docker images | grep 'aws-cli' > /dev/null 2>&1; then
         echo "    aws-cli image found in cache... OK"
     else
         printf "    building aws-cli image... "
+        # the exec redirect/paste stuff is just a hack to move the build output over some for formatting purposes
         exec 3>&1
         exec 1> >(paste /dev/null -)
-        if ! $docker build -f packer/aws-cli.Dockerfile -t aws-cli --build-arg CLI_BASE_IMAGE="$AWS_CLI_BASE_IMAGE" packer/.; then
+        if ! $docker build -f packer/aws-cli.Dockerfile -t aws-cli --build-arg --no-cache CLI_BASE_IMAGE="$AWS_CLI_BASE_IMAGE" packer/.; then
             echo "Error building dockerfile... exiting." && exit 1
         fi
         exec 1>&3 3>&-
@@ -111,12 +167,12 @@ generate_deployment_uuid(){
 }
 
 
-# builds the drone server ami using packer
+# builds the ami using packer - ./packer/drone_server_ami.json
 build_drone_server_ami(){
     echo "Building AMI... "
     packer_build_cmd="$docker run --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
 
-    # note: ${VARNAME%%[[:cntrl:]]} strings trailing /r's from keys. dang bashism's.
+    # note: ${VARNAME%%[[:cntrl:]]} removes trailing /r's from strings. dang tty's.
     $packer_build_cmd \
         -var aws_access_key="${DRONE_BUILDER_AWS_ACCESS_KEY_ID%%[[:cntrl:]]}" \
         -var aws_secret_key="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY%%[[:cntrl:]]}" \
@@ -128,12 +184,12 @@ build_drone_server_ami(){
         -var drone_image="$DRONE_IMAGE" \
         -var docker_compose_version="$DOCKER_COMPOSE_VERSION" \
         -var iam_instance_profile="DroneBuilderInstanceProfile" \
-        podchaser_drone_server_ami.json
+        drone_server_ami.json
 }
 
 
 # gets the latest ami id from ./packer/manifest.json (which is generated during builds)
-get_latest_ami_id(){
+get_and_validate_ami_id(){
     local ami_id=
     local last_run_uuid=
     local current_run_uuid=
@@ -151,21 +207,21 @@ get_latest_ami_id(){
 }
 
 
-main(){
-    # configure docker command
+build(){
+    # configure docker command and make sure it's running
     docker="$(get_docker_cmd)"
     if ! $docker images > /dev/null 2>&1; then
         $docker info
     fi
 
-    # pull command images and build aws-cli
+    # pull command images and build the aws-cli image
     echo "Prepping bootstrap: "
     pull_image "$AWS_CLI_BASE_IMAGE" && echo "OK"
     pull_image "$PACKER_BASE_IMAGE" && echo "OK"
     pull_image "$TERRAFORM_BASE_IMAGE" && echo "OK"
     build_aws_cli_image
 
-    # generate temp aws credentials
+    # assume the builder role and generate temp aws credentials
     generate_build_credentials
 
     # generate a 32 character unique uuid for tagging drone resources
@@ -179,16 +235,14 @@ main(){
         echo "$DRONE_DEPLOYMENT_ID"
     fi
 
-    # build the server ami
+    # build the server ami and validate
     if build_drone_server_ami; then
-        # get the ami id (ensure manifest.json is synced to disk first) & validate
+        # get the ami id and validate (ensure manifest.json is synced to disk first)
         sync
-        if ! ami_id="$(get_latest_ami_id)"; then
-            echo "$ami_id"
-            exit 1
+        if ! ami_id="$(get_and_validate_ami_id)"; then
+            echo "$ami_id" && exit 1
         else
             export AMI_ID="${ami_id%%[[:cntrl:]]}"
-            echo "Drone AMI $AMI_ID built successfully. Don't forget to commit packer/manifest.json to git."
         fi
     else
         echo "Failed to build AMI. Try running with 'bash -x ./bootstrap-drone.sh' to debug script.. exiting."
@@ -196,4 +250,20 @@ main(){
     fi
 }
 
-main
+##### script entrypoint below #####
+
+# parse command line args
+while [[ -n ${1:-} ]]; do
+    case $1 in
+        -h | --help) help_message; graceful_exit ;;
+        -n | --no-cache) REBUILD="true" ;;
+        -p | --purge) PURGE="true" ;;
+        --* | -*) usage; error_exit "Unknown option $1" ;;
+        *) usage; error_exit "Unknown argument $1" ;;
+    esac
+    shift
+done
+
+# start the build & exit if successful
+build
+graceful_exit
