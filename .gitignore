@@ -17,3 +17,6 @@ override.tf.json
 ## Packer
 packer_cache/
 *.box
+
+# ignore manifest.json during dev
+packer/manifest.json
