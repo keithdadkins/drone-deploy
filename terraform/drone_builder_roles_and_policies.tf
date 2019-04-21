@@ -165,6 +165,6 @@ resource "aws_iam_policy_attachment" "s3" {
 
 # the profile to launch our ec2 instance with
 resource "aws_iam_instance_profile" "drone-builder" {
-  name  = "drone-builder-instance-profile"
+  name  = "drone-builder"
   role = "${aws_iam_role.drone-builder.name}"
 }
