@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # Builds and bootstraps the drone server amazon machine image.
-# Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--purge]
+# Usage: bootstrap-drone.sh [-h|--help] [-p|--profile] [--no-cache] [--rm]
 
 set -euo pipefail
+
+# aws credentials (use --profile if set, else uses access keys)
+AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
+AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
+AWS_PROFILE="${AWS_PROFILE:-}"
 unset AWS_SESSION_TOKEN
 
 # drone settings
@@ -54,7 +59,7 @@ signal_exit(){
 }
 
 usage() {
-    echo -e "Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--purge]"
+    echo -e "Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--profile [name]] [--rm]"
 }
 
 help_message() {
@@ -64,9 +69,25 @@ help_message() {
     $(usage)
 
     Options:
-    -h, --help  Display this help message and exit.
-    -n, --no-cache  Don't use cached images. Rebuild from scratch.
-    -p, --purge  Remove docker images downloaded/created during the build.
+    -h, --help    Display this help message and exit.
+    --no-cache    Don't use cached images. Rebuild from scratch.
+    --rm          Remove docker images downloaded/created during the build.
+    -p, --profile [profile-name] 
+                  Use a configured aws profile instead of access keys. Uses 'default' profile if name not given.
+                  The profile must not be a root account holder profile (root accounts cannot AssumeRole).
+    
+    Examples:
+    Edit and source the .env file.
+    $> . .env
+
+    Bootstrap using AWS access keys
+    $> AWS_ACCESS_KEY_ID='ABCD123452JIMTAMQGU2' AWS_SECRET_ACCESS_KEY='ABCDeLjflnVj+1234567/fooBARsqwDAQTtCmI' ./bootstrap-drone.sh
+
+    Bootstap using your default AWS profile (~/.aws/credentials) and remove bootstrap docker images when done
+    ./bootstrap-drone.sh -p --rm
+
+    Bootstrap using a named profile and rebuild docker-images instead of using cached images.
+    ./bootstrap-drone.sh --profile prod --no-cache
 
 _EOF_
     return
@@ -121,7 +142,7 @@ build_aws_cli_image(){
         # the exec redirect/paste stuff is just a hack to move the build output over some for formatting purposes
         exec 3>&1
         exec 1> >(paste /dev/null -)
-        if ! $docker build -f packer/aws-cli.Dockerfile -t aws-cli --build-arg --no-cache CLI_BASE_IMAGE="$AWS_CLI_BASE_IMAGE" packer/.; then
+        if ! $docker build -f packer/aws-cli/aws-cli.Dockerfile -t aws-cli --no-cache --build-arg CLI_BASE_IMAGE="$AWS_CLI_BASE_IMAGE" packer/aws-cli/.; then
             echo "Error building dockerfile... exiting." && exit 1
         fi
         exec 1>&3 3>&-
@@ -129,17 +150,28 @@ build_aws_cli_image(){
     fi
 }
 
-
 # assumes the IAM role that Packer uses during AMI creation and exports a set of temp aws credentials that we pass to packer
 generate_build_credentials(){
-    # The user running this script must have permissions to assume the DroneBuilder role and
-    # permissions to pass the DroneServer role as well. See README.md for more info.
-    local temp_role=
-    temp_role="$(aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name "drone-builder")"
+    # configure AWS_PROFILE if provided, else use access keys in the docker command
+    local aws_cmd=
+    if [ -z "$AWS_PROFILE" ]; then
+        echo "using aws access keys"
+        aws_cmd="$docker run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws-cli -- aws"
+    else
+        echo "using aws profile"
+        aws_cmd="$docker run --rm -v ${HOME}/.aws:/root/.aws:ro -e AWS_DEFAULT_PROFILE=$AWS_PROFILE aws-cli -- aws"
+    fi
 
-    DRONE_BUILDER_AWS_ACCESS_KEY_ID=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.AccessKeyId | xargs")
-    DRONE_BUILDER_AWS_SECRET_ACCESS_KEY=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SecretAccessKey | xargs")
-    DRONE_BUILDER_AWS_SESSION_TOKEN=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_role' | jq .Credentials.SessionToken | xargs")
+    # The user running this script must have permissions to assume the drone-builder role in order to bootstrap packer
+    local temp_creds=
+    temp_creds="$($aws_cmd sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name drone-builder)"
+    #     echo "Unable to perform the AssumeRole operation for the current user."
+    #     exit 1
+    # fi
+
+    DRONE_BUILDER_AWS_ACCESS_KEY_ID=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_creds' | jq .Credentials.AccessKeyId | xargs")
+    DRONE_BUILDER_AWS_SECRET_ACCESS_KEY=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_creds' | jq .Credentials.SecretAccessKey | xargs")
+    DRONE_BUILDER_AWS_SESSION_TOKEN=$($docker run --rm aws-cli /bin/sh -c "echo '$temp_creds' | jq .Credentials.SessionToken | xargs")
     export DRONE_BUILDER_AWS_ACCESS_KEY_ID
     export DRONE_BUILDER_AWS_SECRET_ACCESS_KEY
     export DRONE_BUILDER_AWS_SESSION_TOKEN
@@ -182,7 +214,7 @@ build_drone_server_ami(){
         -var drone_version="$DRONE_VERSION" \
         -var drone_image="$DRONE_IMAGE" \
         -var docker_compose_version="$DOCKER_COMPOSE_VERSION" \
-        -var iam_instance_profile="DroneBuilderInstanceProfile" \
+        -var iam_instance_profile="drone-builder" \
         packer_build_drone_server_ami.json
 }
 
@@ -255,8 +287,15 @@ build(){
 while [[ -n ${1:-} ]]; do
     case $1 in
         -h | --help) help_message; graceful_exit ;;
-        -n | --no-cache) REBUILD="true" ;;
-        -p | --purge) PURGE="true" ;;
+        -p | --profile)
+            if [ -z "${2:-}" ] || [[ "${2:-}" == -* ]]; then
+                AWS_PROFILE="default"
+            else
+                shift; AWS_PROFILE="$1"
+            fi
+        ;;
+        --no-cache) REBUILD="true" ;;
+        --rm) PURGE="true" ;;
         --* | -*) usage; error_exit "Unknown option $1" ;;
         *) usage; error_exit "Unknown argument $1" ;;
     esac
