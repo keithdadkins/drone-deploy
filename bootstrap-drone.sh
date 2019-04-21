@@ -183,7 +183,7 @@ build_drone_server_ami(){
         -var drone_image="$DRONE_IMAGE" \
         -var docker_compose_version="$DOCKER_COMPOSE_VERSION" \
         -var iam_instance_profile="DroneBuilderInstanceProfile" \
-        drone_server_ami.json
+        packer_build_drone_server_ami.json
 }
 
 
