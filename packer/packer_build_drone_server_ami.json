@@ -95,11 +95,6 @@
       "type": "file"
     },
     {
-      "destination": "/tmp/make_s3_bucket.sh",
-      "source": "build-scripts/make_s3_bucket.sh",
-      "type": "file"
-    },
-    {
       "destination": "/tmp/cleanup.sh",
       "source": "build-scripts/cleanup.sh",
       "type": "file"
