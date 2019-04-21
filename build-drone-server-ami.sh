@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds and bootstraps the drone server amazon machine image.
-# Usage: bootstrap-drone.sh [-h|--help] [-p|--profile] [--no-cache] [--rm]
+# Builds the drone server amazon machine image.
+# Usage: build-drone-server-ami.sh [-h|--help] [-p|--profile] [--no-cache] [--rm]
 
 set -euo pipefail
 
@@ -14,7 +14,6 @@ unset AWS_SESSION_TOKEN
 DRONE_REGION="${DRONE_REGION:-}"
 DRONE_VPC_ID="${DRONE_VPC_ID:-}"
 DRONE_BUILDER_ROLE_ARN="${DRONE_BUILDER_ROLE_ARN:-}"
-DRONE_SERVER_ROLE_ARN="${DRONE_SERVER_ROLE_ARN:-}"
 DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
 
@@ -59,13 +58,13 @@ signal_exit(){
 }
 
 usage() {
-    echo -e "Usage: bootstrap-drone.sh [-h|--help] [-n|--no-cache] [-p|--profile [name]] [--rm]"
+    echo -e "Usage: build-drone-server-ami.sh [-h|--help] [-n|--no-cache] [-p|--profile [name]] [--rm]"
 }
 
 help_message() {
     cat <<- _EOF_
-    bootstrap-drone.sh
-    builds and bootstraps a drone-server AMI on AWS.
+    build-drone-server-ami.sh
+    Bootstraps a packer ec2 instance and builds the drone-server amazon machine image.
     $(usage)
 
     Options:
@@ -80,14 +79,14 @@ help_message() {
     Edit and source the .env file.
     $> . .env
 
-    Bootstrap using AWS access keys
-    $> AWS_ACCESS_KEY_ID='ABCD123452JIMTAMQGU2' AWS_SECRET_ACCESS_KEY='ABCDeLjflnVj+1234567/fooBARsqwDAQTtCmI' ./bootstrap-drone.sh
+    Build using AWS access keys
+    $> AWS_ACCESS_KEY_ID='ABCD123452JIMTAMQGU2' AWS_SECRET_ACCESS_KEY='ABCDeLjflnVj+1234567/fooBARsqwDAQTtCmI' ./build-drone-server-ami.sh
 
-    Bootstap using your default AWS profile (~/.aws/credentials) and remove bootstrap docker images when done
-    ./bootstrap-drone.sh -p --rm
+    Build using your default AWS profile (~/.aws/credentials) and remove bootstrap docker images when done
+    ./build-drone-server-ami.sh -p --rm
 
-    Bootstrap using a named profile and rebuild docker-images instead of using cached images.
-    ./bootstrap-drone.sh --profile prod --no-cache
+    Build using a named profile and rebuild docker-images instead of using cached images.
+    ./build-drone-server-ami.sh --profile prod --no-cache
 
 _EOF_
     return
@@ -198,7 +197,7 @@ generate_deployment_uuid(){
 }
 
 
-# builds the ami using packer - ./packer/drone_server_ami.json
+# builds the ami
 build_drone_server_ami(){
     echo "Building AMI... "
     packer_build_cmd="$docker run --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
@@ -246,7 +245,7 @@ build(){
     fi
 
     # pull command images and build the aws-cli image
-    echo "Prepping bootstrap: "
+    echo "Preparing to build: "
     pull_image "$AWS_CLI_BASE_IMAGE" && echo "OK"
     pull_image "$PACKER_BASE_IMAGE" && echo "OK"
     pull_image "$TERRAFORM_BASE_IMAGE" && echo "OK"
@@ -276,7 +275,7 @@ build(){
             export AMI_ID="${ami_id%%[[:cntrl:]]}"
         fi
     else
-        echo "Failed to build AMI. Try running with 'bash -x ./bootstrap-drone.sh' to debug script.. exiting."
+        echo "Failed to build AMI. Try running with 'bash -x ./build-drone-server-ami.sh' to debug script.. exiting."
         exit 1
     fi
 }
