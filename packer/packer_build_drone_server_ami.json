@@ -100,11 +100,6 @@
       "type": "file"
     },
     {
-      "destination": "/tmp/s3_bucket_policy.json",
-      "source": "s3_bucket_policy.json",
-      "type": "file"
-    },
-    {
       "destination": "/tmp/cleanup.sh",
       "source": "build-scripts/cleanup.sh",
       "type": "file"
@@ -129,13 +124,11 @@
         "chmod +x bootstrap_docker_compose.sh",
         "chmod +x bootstrap_drone.sh",
         "chmod +x build_aws_cli_image.sh",
-        "chmod +x make_s3_bucket.sh",
         "chmod +x cleanup.sh",
         "./bootstrap_docker.sh",
         "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
         "./build_aws_cli_image.sh",
-        "./make_s3_bucket.sh",
         "mv docker-compose.yaml /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
         "mv Caddyfile /home/ubuntu/",
