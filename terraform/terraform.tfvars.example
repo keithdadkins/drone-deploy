@@ -1,0 +1,21 @@
+# where to deploy
+aws_region  = "us-east-1"
+vpc_id      = "YOUR_VPC_ID"
+
+# deployment config
+drone_server_instance_type  = "t2.micro"
+drone_server_ami            = "AMI_ID_FROM_PACKER_BUILD (see packer/manifest.json)"
+drone_deployment_id         = "DRONE_DEPLOYMENT_ID_FROM_PACKER_BUILD (see packer/manifest.json)"
+drone_server_key_pair_name  = "YOUR_DRONE_KEY_PAIR_NAME (see README.md)"
+
+# sg access rules
+drone_server_allow_http     = ["0.0.0.0/0"]
+drone_server_allow_https    = ["0.0.0.0/0"]
+drone_server_allow_ssh = [
+    "YOUR_DRONE_ADMINS_STATIC_IP_ADDRESS/32",
+    "ANOTHER_DRONE_ADMINS_STATIC_IP_ADDRESS/32"
+]
+
+# drone.YOUR_ROUTE53_DOMAIN.com
+drone_server_machine_name   = "drone"
+drone_server_hosted_zone    = "yourdomainname.com"

@@ -11,6 +11,7 @@
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.tfvars
 override.tf
 override.tf.json
 
