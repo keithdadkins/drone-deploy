@@ -16,6 +16,7 @@ DRONE_VPC_ID="${DRONE_VPC_ID:-}"
 DRONE_BUILDER_ROLE_ARN="${DRONE_BUILDER_ROLE_ARN:-}"
 DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
+DRONE_RPC_SECRET="${DRONE_RPC_SECRET:-}"
 
 # defaults for docker images
 AWS_CLI_BASE_IMAGE="${AWS_CLI_BASE_IMAGE:-python:3.7}"
@@ -27,6 +28,7 @@ TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:latest}"
 # REBUILD == rebuild docker images from scratch
 PURGE="false"
 REBUILD="false"
+
 
 #### basic shell functions (error trapping, handeling, arg parsing)
 clean_up() {
@@ -155,10 +157,8 @@ generate_build_credentials(){
     # configure AWS_PROFILE if provided, else use access keys in the docker command
     local aws_cmd=
     if [ -z "$AWS_PROFILE" ]; then
-        echo "using aws access keys"
         aws_cmd="$docker run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws-cli -- aws"
     else
-        echo "using aws profile"
         aws_cmd="$docker run --rm -v ${HOME}/.aws:/root/.aws:ro -e AWS_DEFAULT_PROFILE=$AWS_PROFILE aws-cli -- aws"
     fi
 
@@ -184,17 +184,16 @@ get_aws_command(){
     echo "$docker $session_creds run --rm aws-cli -- aws"
 }
 
-
-# generates a unique deployment uuid
-generate_deployment_uuid(){
+# generates 32 character uuid
+generate_uuid(){
     local uuid=
     uuid=$($docker run --rm aws-cli /bin/sh -c "openssl rand -hex 16")
 
-    # fail if uuid is not at least 32 chars long
+    # error if uuid is not at least 32 chars long
     if (( ${#uuid} < 32 )); then
-        echo "Failed to generate a 32 char UUID... exiting." && exit 1
+        return 1
     fi
-    echo "$uuid"
+    echo "$uuid"   
 }
 
 
@@ -255,15 +254,25 @@ build(){
     # assume the builder role and generate temp aws credentials
     generate_build_credentials
 
-    # generate a 32 character unique uuid for tagging drone resources
+    # generate a unique deployment id for tagging drone resources
     printf "Generating unique drone-deployment-id: "
-    if ! deployment_id=$(generate_deployment_uuid); then
-        echo "Unable to generate UUID."
-        echo "$deployment_id"
-        exit 1
-    else
+    if deployment_id="$(generate_uuid)"; then
         export DRONE_DEPLOYMENT_ID="$deployment_id"
         echo "$DRONE_DEPLOYMENT_ID"
+    else
+        echo "Error generating drone-deployment-id... exiting."
+    fi
+
+    # generate a unique DRONE_RPC_SECRET uuid (if not provided)
+    if [ -z "$DRONE_RPC_SECRET" ]; then
+        printf "Generating unique drone rpc uuid... "
+        if DRONE_RPC_SECRET="$(generate_uuid)"; then
+            echo "********************************"
+        else
+            echo "Error generating RPC UUID... exiting." && exit 1
+        fi
+    else
+        echo "Using \$DRONE_RPC_SECRET environment variable."
     fi
 
     # build the server ami and validate
