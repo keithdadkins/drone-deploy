@@ -16,7 +16,7 @@ services:
     environment:
       - CADDYPATH=/root/.caddy
   drone-server:
-    image: drone/drone:latest
+    image: ${DRONE_IMAGE}
     ports:
       - 80
     volumes:
@@ -24,17 +24,19 @@ services:
     restart: always
     environment:
       - DEBUG=true
-      - DRONE_RPC_SECRET=
-      - DRONE_ADMIN=
-      - DRONE_USER_FILTER=
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_ADMIN=${DRONE_ADMIN}
+      - DRONE_USER_FILTER=${DRONE_USER_FILTER}
       - DRONE_OPEN=false
-      - DRONE_SERVER_HOST=
+      - DRONE_SERVER_HOST=${DRONE_SERVER_HOST}
       - DRONE_SERVER_PROTO=http
       - DRONE_GITHUB_SERVER=https://github.com
-      - DRONE_GITHUB_CLIENT_ID=
-      - DRONE_GITHUB_CLIENT_SECRET=
+      - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
+      - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
       - DRONE_AGENTS_ENABLED=true
       - DRONE_DATABASE_DATASOURCE=/data/database.sqlite
+      - DRONE_S3_BUCKET=${DRONE_S3_BUCKET}-${DRONE_DEPLOYMENT_ID}
+      - AWS_REGION=${DRONE_REGION}
   drone-agent:
     image: drone/agent:1
     restart: always
@@ -45,4 +47,4 @@ services:
     environment:
       - DRONE_RPC_SERVER=http://drone-server
       - DRONE_RUNNER_CAPACITY=1
-      - DRONE_RPC_SECRET=
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}

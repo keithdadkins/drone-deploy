@@ -149,6 +149,7 @@ build_aws_cli_image(){
     fi
 }
 
+
 # assumes the IAM role that Packer uses during AMI creation and exports a set of temp aws credentials that we pass to packer
 generate_build_credentials(){
     # configure AWS_PROFILE if provided, else use access keys in the docker command
