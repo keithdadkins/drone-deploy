@@ -25,6 +25,7 @@ DRONE_USER_FILTER="${DRONE_USER_FILTER:-}"
 DRONE_GITHUB_CLIENT_ID="${DRONE_GITHUB_CLIENT_ID:-}"
 DRONE_GITHUB_CLIENT_SECRET="${DRONE_GITHUB_CLIENT_SECRET:-}"
 DRONE_S3_BUCKET="${DRONE_S3_BUCKET:-}"
+DRONE_IMAGE="${DRONE_IMAGE:-drone/drone:latest}"
 
 
 # defaults for docker images
@@ -360,6 +361,7 @@ build(){
     # non-secret paramaters
     put_parameter "$prefix.DRONE_REGION" "$DRONE_REGION"
     put_parameter "$prefix.DRONE_SERVER_HOST" "$DRONE_SERVER_HOST"
+    put_parameter "$prefix.DRONE_IMAGE" "$DRONE_IMAGE"
 
     # secret paramaters
     put_secret_parameter "$prefix.DRONE_ADMIN" "$DRONE_ADMIN"

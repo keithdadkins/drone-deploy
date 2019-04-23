@@ -42,7 +42,7 @@ update_compose_file() {
     local search=$1
     local replace=$2
 
-    echo "sed -i \"s/\\\${$search}/${replace}/g\" /home/ubuntu/docker-compose.yaml"
+    sed -i "s/\\\${$search}/${replace}/g" /home/ubuntu/docker-compose.yaml
 }
 
 # set region and key prefix
@@ -50,7 +50,7 @@ prefix="drone.$DRONE_DEPLOYMENT_ID"
 set_region > /dev/null 2>&1
 
 # fetch and update non-secret configs in the compose file
-configs=('DRONE_REGION' 'DRONE_SERVER_HOST')
+configs=('DRONE_REGION' 'DRONE_SERVER_HOST' 'DRONE_IMAGE')
 for config in "${configs[@]}"; do
     param=$(get_parameter "$config")
     update_compose_file "$config" "$param"
