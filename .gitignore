@@ -21,3 +21,7 @@ packer_cache/
 
 # ignore manifest.json during dev
 packer/manifest.json
+
+# do not store caddy certs
+packer/drone-server-configs/caddy.tar.gz
+
