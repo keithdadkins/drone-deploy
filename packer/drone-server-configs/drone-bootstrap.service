@@ -1,0 +1,10 @@
+[Unit]
+Description=Drone Bootstrap Script
+After=docker.service network-online.target
+Requires=docker.service network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/drone-bootstrap.sh
+
+[Install]
+WantedBy=default.target

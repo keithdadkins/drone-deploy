@@ -91,6 +91,17 @@ resource "aws_iam_policy" "drone-builder-ec2" {
                 "Resource": [
                     "${aws_iam_role.drone-builder.arn}"
                 ]
+            },
+            {
+                "Effect":"Allow",
+                "Action":[
+                    "ssm:DescribeParameters",
+                    "ssm:GetParameter",
+                    "ssm:GetParametersByPath"
+                ],
+                "Resource":[
+                    "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/drone*"
+                ]
             }
         ]
     }
