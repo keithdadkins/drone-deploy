@@ -10,13 +10,22 @@ AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
 AWS_PROFILE="${AWS_PROFILE:-}"
 unset AWS_SESSION_TOKEN
 
-# drone settings
-DRONE_REGION="${DRONE_REGION:-}"
-DRONE_VPC_ID="${DRONE_VPC_ID:-}"
+# builder creds
 DRONE_BUILDER_ROLE_ARN="${DRONE_BUILDER_ROLE_ARN:-}"
 DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
+
+# drone settings
+DRONE_REGION="${DRONE_REGION:-}"
+DRONE_VPC_ID="${DRONE_VPC_ID:-}"
 DRONE_RPC_SECRET="${DRONE_RPC_SECRET:-}"
+DRONE_SERVER_HOST="${DRONE_SERVER_HOST:-}"
+DRONE_ADMIN="${DRONE_ADMIN:-}"
+DRONE_USER_FILTER="${DRONE_USER_FILTER:-}"
+DRONE_GITHUB_CLIENT_ID="${DRONE_GITHUB_CLIENT_ID:-}"
+DRONE_GITHUB_CLIENT_SECRET="${DRONE_GITHUB_CLIENT_SECRET:-}"
+DRONE_S3_BUCKET="${DRONE_S3_BUCKET:-}"
+
 
 # defaults for docker images
 AWS_CLI_BASE_IMAGE="${AWS_CLI_BASE_IMAGE:-python:3.7}"
@@ -29,6 +38,9 @@ TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:latest}"
 PURGE="false"
 REBUILD="false"
 
+# globals
+aws=
+docker=
 
 #### basic shell functions (error trapping, handeling, arg parsing)
 clean_up() {
@@ -124,6 +136,20 @@ get_docker_cmd(){
 }
 
 
+# builds a docker command with our temporary aws credentials set as env vars
+get_aws_command(){
+    local aws_cmd=
+
+    # configure AWS_PROFILE if provided, else use access keys in the docker command
+    if [ -z "$AWS_PROFILE" ]; then
+        aws_cmd="$docker run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws-cli -- aws"
+    else
+        aws_cmd="$docker run --rm -v ${HOME}/.aws:/root/.aws:ro -e AWS_DEFAULT_PROFILE=$AWS_PROFILE aws-cli -- aws"
+    fi
+    echo "$aws_cmd"
+}
+
+
 # pulls a docker image without all the verbose output
 pull_image(){
     # $1 == docker image e.g., 'hashicorp/packer:latest'
@@ -154,17 +180,10 @@ build_aws_cli_image(){
 
 # assumes the IAM role that Packer uses during AMI creation and exports a set of temp aws credentials that we pass to packer
 generate_build_credentials(){
-    # configure AWS_PROFILE if provided, else use access keys in the docker command
-    local aws_cmd=
-    if [ -z "$AWS_PROFILE" ]; then
-        aws_cmd="$docker run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws-cli -- aws"
-    else
-        aws_cmd="$docker run --rm -v ${HOME}/.aws:/root/.aws:ro -e AWS_DEFAULT_PROFILE=$AWS_PROFILE aws-cli -- aws"
-    fi
 
     # The user running this script must have permissions to assume the drone-builder role in order to bootstrap packer
     local temp_creds=
-    temp_creds="$($aws_cmd sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name drone-builder)"
+    temp_creds="$($aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name drone-builder)"
     #     echo "Unable to perform the AssumeRole operation for the current user."
     #     exit 1
     # fi
@@ -178,12 +197,6 @@ generate_build_credentials(){
 }
 
 
-# builds a docker command with our temporary aws credentials set as env vars
-get_aws_command(){
-    local session_creds="-e AWS_SESSION_TOKEN=$DRONE_BUILDER_AWS_SESSION_TOKEN -e AWS_ACCESS_KEY_ID=$DRONE_BUILDER_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$DRONE_BUILDER_AWS_SECRET_ACCESS_KEY" 
-    echo "$docker $session_creds run --rm aws-cli -- aws"
-}
-
 # generates 32 character uuid
 generate_uuid(){
     local uuid=
@@ -194,6 +207,52 @@ generate_uuid(){
         return 1
     fi
     echo "$uuid"   
+}
+
+
+# adds a non-encrypted parameter to aws parameter store
+put_parameter(){
+    local key=      # $1 == key
+    local value=    # $2 == value
+    key="${1:-}"
+    value="${2:-}"
+
+    # return error if no key or value (paramater store requires a non-null, non-blank value)
+    if [ -z "$key" ] || [ -z "$value" ]; then 
+        return 2
+    fi
+
+    # put the parameter
+    printf "    adding '$key'... "
+    if $aws ssm put-parameter --name "$key" --value "$value" --type String --region "$DRONE_REGION" > /dev/null 2>&1; then
+        echo "OK"
+    else
+        echo "X"
+        return 1
+    fi
+}
+
+
+# adds an encrypted paramater to aws paramater store
+put_secret_parameter(){
+    local key=      # $1 == key
+    local value=    # $2 == value
+    key="${1:-}"
+    value="${2:-}"
+
+    # return error if no key or value (paramater store requires a non-null, non-blank value)
+    if [ -z "$key" ] || [ -z "$value" ]; then 
+        return 2
+    fi
+
+    # put the parameter
+    printf "    adding secret '$key'... "
+    if $aws ssm put-parameter --name "$key" --value "$value" --type SecureString --region "$DRONE_REGION" > /dev/null 2>&1; then
+        echo "OK"
+    else
+        echo "X"
+        return 1
+    fi
 }
 
 
@@ -244,6 +303,9 @@ build(){
         $docker info
     fi
 
+    # set aws command
+    aws="$(get_aws_command)"
+
     # pull command images and build the aws-cli image
     echo "Preparing to build: "
     pull_image "$AWS_CLI_BASE_IMAGE" && echo "OK"
@@ -288,6 +350,24 @@ build(){
         echo "Failed to build AMI. Try running with 'bash -x ./build-drone-server-ami.sh' to debug script.. exiting."
         exit 1
     fi
+
+    # add our configs to parameter store
+    echo "Adding configs to parameter store: "
+    aws=$(get_aws_command)
+    local prefix=
+    prefix="drone.$DRONE_DEPLOYMENT_ID"
+
+    # non-secret paramaters
+    put_parameter "$prefix.DRONE_REGION" "$DRONE_REGION"
+    put_parameter "$prefix.DRONE_SERVER_HOST" "$DRONE_SERVER_HOST"
+
+    # secret paramaters
+    put_secret_parameter "$prefix.DRONE_ADMIN" "$DRONE_ADMIN"
+    put_secret_parameter "$prefix.DRONE_USER_FILTER" "$DRONE_USER_FILTER"
+    put_secret_parameter "$prefix.DRONE_RPC_SECRET" "$DRONE_RPC_SECRET"
+    put_secret_parameter "$prefix.DRONE_GITHUB_CLIENT_ID" "$DRONE_GITHUB_CLIENT_ID"
+    put_secret_parameter "$prefix.DRONE_GITHUB_CLIENT_SECRET" "$DRONE_GITHUB_CLIENT_SECRET"
+    echo "Done. The uploaded parameters will be used by the drone server instance during launch."
 }
 
 ##### script entrypoint below #####

@@ -35,7 +35,7 @@ services:
       - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
       - DRONE_AGENTS_ENABLED=true
       - DRONE_DATABASE_DATASOURCE=/data/database.sqlite
-      - DRONE_S3_BUCKET=${DRONE_S3_BUCKET}-${DRONE_DEPLOYMENT_ID}
+      - DRONE_S3_BUCKET=drone-data-${DRONE_DEPLOYMENT_ID}
       - AWS_REGION=${DRONE_REGION}
   drone-agent:
     image: drone/agent:1

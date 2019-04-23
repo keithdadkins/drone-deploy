@@ -132,6 +132,7 @@
         "mv drone_reload.service /etc/systemd/system/",
         "chown root:root /etc/systemd/system/drone.service",
         "chown root:root /etc/systemd/system/drone_reload.service",
+        "echo 'DRONE_DEPLOYMENT_ID={{user `drone_deployment_uuid`}}' >> /etc/environment",
         "wait",
         "./cleanup.sh"
       ],

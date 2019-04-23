@@ -3,6 +3,11 @@ variable "vpc_id" {
     description = "The vpc id where you want drone to be deployed."
 }
 
+# region
+variable "aws_region" {
+    description = "AWS region we are deploying drone into."
+}
+
 # drone-server ami
 variable "drone_server_ami" {
     description = "The drone-server AMI used to launch the drone server ec2 instance."
