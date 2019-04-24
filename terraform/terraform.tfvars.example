@@ -16,6 +16,6 @@ drone_server_allow_ssh = [
     "ANOTHER_DRONE_ADMINS_STATIC_IP_ADDRESS/32"
 ]
 
-# drone.YOUR_ROUTE53_DOMAIN.com
+# e.g., drone.yourdomainname.com
 drone_server_machine_name   = "drone"
 drone_server_hosted_zone    = "yourdomainname.com"
