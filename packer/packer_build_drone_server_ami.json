@@ -101,6 +101,11 @@
       "generated": true
     },
     {
+      "destination": "/tmp/drone-config",
+      "source": "drone-server-configs/drone-config.sh",
+      "type": "file"
+    },
+    {
       "destination": "/tmp/cleanup.sh",
       "source": "build-scripts/cleanup.sh",
       "type": "file"
@@ -130,8 +135,8 @@
         "./bootstrap_docker_compose.sh",
         "./bootstrap_drone.sh",
         "./build_aws_cli_image.sh",
-        "mv docker-compose.yaml /home/ubuntu/",
-        "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml",
+        "mv docker-compose.yaml /home/ubuntu/docker-compose.yaml.template",
+        "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml.template",
         "mv Caddyfile /home/ubuntu/",
         "chown ubuntu:ubuntu /home/ubuntu/Caddyfile",
         "tar -xvzf caddy.tar.gz -C /home/ubuntu/",
@@ -140,6 +145,10 @@
         "chown root:root /etc/systemd/system/drone.service",
         "chown root:root /etc/systemd/system/drone_reload.service",
         "echo 'DRONE_DEPLOYMENT_ID={{user `drone_deployment_uuid`}}' >> /etc/environment",
+        "mv drone-config /usr/local/bin/drone-config",
+        "chmod +x /usr/local/bin/drone-config",
+        "chmod +x /etc/systemd/system/drone*",
+        "systemctl enable drone.service",
         "wait",
         "./cleanup.sh"
       ],

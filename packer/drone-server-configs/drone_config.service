@@ -4,7 +4,7 @@ After=docker.service network-online.target
 Requires=docker.service network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/drone-bootstrap.sh
+ExecStart=/usr/local/bin/drone-config
 
 [Install]
 WantedBy=default.target
