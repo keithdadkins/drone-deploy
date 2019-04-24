@@ -179,3 +179,7 @@ resource "aws_iam_instance_profile" "drone-builder" {
   name  = "drone-builder"
   role = "${aws_iam_role.drone-builder.name}"
 }
+
+output "DRONE_BUILDER_ROLE_ARN" {
+  value = "${aws_iam_role.drone-builder.arn}"
+}

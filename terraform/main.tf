@@ -1,5 +1,10 @@
-# get the current aws user
+# get the current aws user identity
 data "aws_caller_identity" "current" { }
+
+# set aws region
+provider "aws" {
+  region              = "${var.aws_region}"
+}
 
 # drone-server instance
 resource "aws_instance" "drone-server" {
