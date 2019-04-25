@@ -1,8 +1,10 @@
 import sys
+import click
 import boto3
 import boto3.session
 import botocore.exceptions
-import click
+from pathlib import Path
+from dotenv import load_dotenv
 from drone_deploy.bootstrap_cli import bootstrap
 
 
@@ -79,8 +81,13 @@ def cli(ctx, profile, region, aws_access_key_id, aws_secret_access_key, aws_sess
                           aws_session_token=aws_session_token)
 
 
+# load .env file
+env_path = Path(__file__).parent.joinpath('.env')
+load_dotenv(dotenv_path=env_path)
+
 # hookup 'drone-deploy' sub commands
 cli.add_command(bootstrap)
 
+# pyinstaller statement to make it work with click
 if getattr(sys, 'frozen', False):
     cli(sys.argv[1:])

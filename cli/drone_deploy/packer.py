@@ -3,14 +3,14 @@ import subprocess
 from pathlib import Path
 
 
-def build_ami():
+def build_ami(profile_name=None):
     '''
     Runs the build-drone-server-ami.sh script to build the AMI.
     '''
     # script_path = Path(__file__).parents[2].resolve()
     script_path = Path.cwd()
     try:
-        command = ". .env && ./build-drone-server-ami.sh -p"
+        command = f"./build-drone-server-ami.sh -p {profile_name}"
         p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                              cwd=script_path)
         while True:

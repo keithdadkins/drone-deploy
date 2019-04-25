@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import boto3
 from pathlib import Path
 
 
@@ -47,6 +48,10 @@ def set_iam_roles_and_policies():
                          -target=aws_iam_policy_attachment.ec2 \
                          -target=aws_iam_policy_attachment.s3 \
                          -target=aws_iam_instance_profile.drone-builder"])
+
+    # export the deploy id
+    account_id = boto3.client('sts').get_caller_identity().get('Account')
+    os.environ['DRONE_BUILDER_ROLE_ARN'] = f"arn:aws:iam::{account_id}:role/drone-builder-role"
 
 
 def apply():

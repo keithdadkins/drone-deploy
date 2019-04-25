@@ -2,3 +2,4 @@ boto3
 click
 pytest
 pytest-cov
+python-dotenv
