@@ -1,0 +1,24 @@
+# deployment id used to tag resources
+drone_deployment_id: "1234"
+
+# dns/domain (route53)
+drone_server_machine_name: drone
+drone_server_hosted_zone: yourroute53domain.com
+
+# where to deploy
+aws_region: us-east-1
+vpc_id: ""
+
+# server settings
+drone_server_ami: ""
+drone_server_key_pair_name: ""
+drone_server_instance_type: t2.micro
+
+# firewall rules
+drone_server_allow_http:
+- 0.0.0.0/0
+drone_server_allow_https:
+- 0.0.0.0/0
+drone_server_allow_ssh:
+- your.admins.ip.address/32
+- another.admins.ip.address/32

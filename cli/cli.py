@@ -6,6 +6,14 @@ import botocore.exceptions
 from pathlib import Path
 from dotenv import load_dotenv
 from drone_deploy.bootstrap_cli import bootstrap
+from drone_deploy.new_deployment_cli import new
+
+
+def check_dir():
+    '''ensure we are running in project root'''
+    if not Path('terraform').exists() or not Path('drone-deploy').exists():
+        click.echo("drone-deploy must be run from the project root directoy.")
+        sys.exit("Exiting.")
 
 
 def aws_session(aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None,
@@ -75,19 +83,26 @@ def cli(ctx, profile, region, aws_access_key_id, aws_secret_access_key, aws_sess
     AWS access keys or profiles can be used; however one or the other must be configured and
     an aws region must set in order to make requests.
     """
+
+    # aws session to pass around
     ctx.obj = aws_session(profile_name=profile, region_name=region,
                           aws_access_key_id=aws_access_key_id,
                           aws_secret_access_key=aws_secret_access_key,
                           aws_session_token=aws_session_token)
 
 
+# make sure we are in project root
+check_dir()
+
 # load .env file
 env_path = Path(__file__).parent.joinpath('.env')
 load_dotenv(dotenv_path=env_path)
 
-# hookup 'drone-deploy' sub commands
-cli.add_command(bootstrap)
-
 # pyinstaller statement to make it work with click
 if getattr(sys, 'frozen', False):
     cli(sys.argv[1:])
+
+
+# hookup 'drone-deploy' sub commands
+cli.add_command(bootstrap)
+cli.add_command(new)
