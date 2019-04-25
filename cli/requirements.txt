@@ -1,5 +1,6 @@
 boto3
 click
+pyyaml
 pytest
 pytest-cov
 python-dotenv
