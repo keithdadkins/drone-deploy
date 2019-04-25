@@ -3,7 +3,7 @@ import boto3
 import boto3.session
 import botocore.exceptions
 import click
-from drone_deploy.config import config
+from drone_deploy.bootstrap_cli import bootstrap
 
 
 def aws_session(aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None,
@@ -14,7 +14,7 @@ def aws_session(aws_access_key_id=None, aws_secret_access_key=None, aws_session_
         - Uses access keys over profile if available.
         - Uses callers region if region_name is not set.
     """
-    session = boto3.session.Session()    
+    session = boto3.session.Session()
 
     # try to get a session using aws profile
     if None not in (aws_access_key_id, aws_access_key_id, aws_session_token):
@@ -80,4 +80,7 @@ def cli(ctx, profile, region, aws_access_key_id, aws_secret_access_key, aws_sess
 
 
 # hookup 'drone-deploy' sub commands
-cli.add_command(config)
+cli.add_command(bootstrap)
+
+if getattr(sys, 'frozen', False):
+    cli(sys.argv[1:])

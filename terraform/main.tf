@@ -26,17 +26,17 @@ resource "aws_eip_association" "drone-server" {
     allocation_id = "${aws_eip.drone-server.id}"
 }
 
-# output messages
-output "drone-server-ssh" {
-    value = <<-CONFIG
+# # output messages
+# output "drone-server-ssh" {
+#     value = <<-CONFIG
 
-        add to your ~/.ssh/config for quick ssh access (replace with path to your key pair)
-        once added, connect with 'ssh "${aws_route53_record.drone-server.fqdn}"'
-        ---
-        # ~/.ssh/config
-        Host "${aws_route53_record.drone-server.fqdn}"
-	        HostName "${aws_route53_record.drone-server.fqdn}"
-	        User ubuntu
-	        IdentityFile ~/.ssh/PATH_TO_YOUR_KEY_PAIR.pem
-    CONFIG
-}
+#         add to your ~/.ssh/config for quick ssh access (replace with path to your key pair)
+#         once added, connect with 'ssh "${aws_route53_record.drone-server.fqdn}"'
+#         ---
+#         # ~/.ssh/config
+#         Host "${aws_route53_record.drone-server.fqdn}"
+# 	        HostName "${aws_route53_record.drone-server.fqdn}"
+# 	        User ubuntu
+# 	        IdentityFile ~/.ssh/PATH_TO_YOUR_KEY_PAIR.pem
+#     CONFIG
+# }
