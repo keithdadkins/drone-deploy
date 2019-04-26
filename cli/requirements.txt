@@ -4,3 +4,4 @@ pyyaml
 pytest
 pytest-cov
 python-dotenv
+ruamel.yaml<=0.15.94
