@@ -8,7 +8,7 @@ from drone_deploy.packer import build_ami
 @click.pass_obj
 def bootstrap(aws):
     """
-    Bootstrap process (set perms, build ami)
+    Bootstraps a server.
     """
     click.echo("Configuring IAM Roles and Policies... ")
     set_iam_roles_and_policies()

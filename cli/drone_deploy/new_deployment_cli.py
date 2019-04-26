@@ -17,7 +17,7 @@ def create_deployment_dir_if_not_exists(name):
 def copy_terraform_to(deployment_dir):
     '''copy terraform templates to new deployment folder'''
     # copy each .tf file
-    terra_path = Path.cwd().joinpath('templates','terraform')
+    terra_path = Path.cwd().joinpath('templates', 'terraform')
     for file in terra_path.glob('*.tf'):
         shutil.copy(file, deployment_dir)
 
@@ -28,12 +28,11 @@ def generate_config_yaml(deployment_dir):
     shutil.copy(template_file, deployment_dir)
 
 # $> drone-deploy new
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, name="new")
 @click.argument('name')
-@click.pass_obj
-def new(aws, name):
+def new_deployment(name):
     """
-    Creates a new deployment configuration in the 'deployments' directory.
+    Initializes a new deployment.
 
     Usage:
         `drone-deploy new NAME`

@@ -5,8 +5,7 @@ import boto3.session
 import botocore.exceptions
 from pathlib import Path
 from dotenv import load_dotenv
-from drone_deploy.bootstrap_cli import bootstrap
-from drone_deploy.new_deployment_cli import new
+from drone_deploy import new_deployment, bootstrap, list_deployments
 
 
 def check_dir():
@@ -105,4 +104,5 @@ if getattr(sys, 'frozen', False):
 
 # hookup 'drone-deploy' sub commands
 cli.add_command(bootstrap)
-cli.add_command(new)
+cli.add_command(new_deployment)
+cli.add_command(list_deployments)
