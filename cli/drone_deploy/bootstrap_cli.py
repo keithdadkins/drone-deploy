@@ -1,4 +1,5 @@
 import os
+import sys
 import click
 from drone_deploy.terraform import set_iam_roles_and_policies, apply
 from drone_deploy.packer import build_ami
@@ -10,6 +11,10 @@ def bootstrap(aws):
     """
     Bootstraps a server.
     """
+    if aws.region is None:
+        print("The AWS 'region' must be set to make requests.", file=sys.stderr)
+        sys.exit("Exiting.")
+
     click.echo("Configuring IAM Roles and Policies... ")
     set_iam_roles_and_policies()
 
