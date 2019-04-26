@@ -1,4 +1,5 @@
 import sys
+import ruamel.yaml
 from ruamel.yaml import YAML
 
 
@@ -50,6 +51,5 @@ class Deployment():
             yaml.dump(self.config, file)
 
     def __str__(self):
-        '''returns configs as formatted yaml'''
-        yaml = YAML()
-        return yaml.dump(self.config, sys.stdout)
+        '''returns pretty formatted yaml'''
+        return str(ruamel.yaml.round_trip_dump(self.config))
