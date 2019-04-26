@@ -45,11 +45,11 @@ class Deployment():
         self.config_file = config_file
         self.config = yaml.load(self.config_file)
 
+    def __str__(self):
+        '''returns pretty formatted yaml'''
+        return str(ruamel.yaml.round_trip_dump(self.config))
+
     def write_config(self):
         yaml = YAML()
         with open(self.config_file, 'w') as file:
             yaml.dump(self.config, file)
-
-    def __str__(self):
-        '''returns pretty formatted yaml'''
-        return str(ruamel.yaml.round_trip_dump(self.config))
