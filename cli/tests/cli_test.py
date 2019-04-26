@@ -9,13 +9,9 @@ def test_cli_smoke_test():
     assert result.exit_code == 0, "'drone-deploy' returned a non-zero exit status"
 
 
-def test_cli_with_named_profile():
+def test_config_list_deployments():
+    '''drone-deploy list'''
+    # TODO setup deployment for testing
     runner = CliRunner()
-    result = runner.invoke(cli, ["--profile=default", "config", "list-available-profiles"])
-    assert 'default' in result.output, "could not use named profile 'default'"
-
-
-def test_cli_fails_with_invalid_profile():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["--profile='foooobarrrsss'", "config", "list-available-profiles"])
-    assert 'default' not in result.output, "should not be able to use an invalid --profile name"
+    result = runner.invoke(cli, ["list"])
+    assert 'foobar' in result.output, "could not list deployments"
