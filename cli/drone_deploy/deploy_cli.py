@@ -1,0 +1,39 @@
+import sys
+import click
+from pathlib import Path
+from drone_deploy.deployment import Deployment
+
+# from drone_deploy.terraform import set_iam_roles_and_policies, apply
+# from drone_deploy.packer import build_ami
+
+# $> drone-deploy deploy [deployment name]
+@click.group(invoke_without_command=True)
+@click.argument('deployment_name')
+@click.pass_obj
+def deploy(aws, deployment_name):
+    """
+    Deploys <deployment-name> using Terraform.
+
+    The <deployment-name> must exist in the ./deployments directory.
+
+    Usage:
+        drone-deploy deploy drone.mydomain.com
+
+    Related:
+        drone-deploy [list, show, validate]
+    """
+    if aws.region is None:
+        print("The AWS 'region' must be set before deployment..", file=sys.stderr)
+        sys.exit("Exiting.")
+
+    deployment_dir = Path.cwd().joinpath('deployments', deployment_name, 'config.yaml').resolve()
+    if not deployment_dir.exists():
+        click.echo("Couldn't find the deployment."
+                   "Run 'drone-deploy list' to see available deployemnts.")
+        return False
+
+    # load the deployment
+    deployment = Deployment(deployment_dir)
+    
+    # apply
+    click.echo(f"Deploying {deployment_name}")
