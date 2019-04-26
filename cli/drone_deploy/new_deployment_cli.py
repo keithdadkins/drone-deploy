@@ -6,7 +6,7 @@ from pathlib import Path
 def create_deployment_dir_if_not_exists(name):
     '''Returns a path to the deployment directory. Creates directory if needed'''
     try:
-        deployment_path = Path.cwd().joinpath('deployment', name)
+        deployment_path = Path.cwd().joinpath('deployments', name)
         Path(deployment_path).mkdir(exist_ok=False, parents=True)
     except FileExistsError:
         return False
@@ -23,7 +23,7 @@ def copy_terraform_to(deployment_dir):
 
 
 def generate_config_yaml(deployment_dir):
-    '''creates an empty config.yaml file in the deployment folder'''
+    '''creates an empty config.yaml file in the deployments folder'''
     template_file = Path('templates/config.yaml')
     shutil.copy(template_file, deployment_dir)
 
