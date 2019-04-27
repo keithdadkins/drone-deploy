@@ -4,10 +4,12 @@ from pathlib import Path
 
 
 def create_deployment_dir_if_not_exists(name):
-    '''Returns a path to the deployment directory. Creates directory if needed'''
+    '''Returns a path to the deployment directory. Creates directories as needed'''
     try:
         deployment_path = Path.cwd().joinpath('deployments', name)
-        Path(deployment_path).mkdir(exist_ok=False, parents=True)
+        # make /deployments/foo/terraform
+        terraform_path = deployment_path.joinpath('terraform')
+        Path(terraform_path).mkdir(exist_ok=False, parents=True)
     except FileExistsError:
         return False
     # return the full path
@@ -16,10 +18,11 @@ def create_deployment_dir_if_not_exists(name):
 
 def copy_terraform_to(deployment_dir):
     '''copy terraform templates to new deployment folder'''
-    # copy each .tf file
-    terra_path = Path.cwd().joinpath('templates', 'terraform')
-    for file in terra_path.glob('*.tf'):
-        shutil.copy(file, deployment_dir)
+    # copies /templates/terraform/*.tf* to /deployments/foo/terraform/
+    template_path = Path.cwd().joinpath('templates', 'terraform')
+    deployment_path = deployment_dir.joinpath('terraform')
+    for file in template_path.glob('*.tf*'):
+        shutil.copy(file, deployment_path)
 
 
 def generate_config_yaml(deployment_dir):
