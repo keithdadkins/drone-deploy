@@ -1,4 +1,3 @@
-import sys
 import ruamel.yaml
 from ruamel.yaml import YAML
 
@@ -43,13 +42,36 @@ class Deployment():
         # use ruamel to parse config file (preserves comments)
         yaml = YAML()
         self.config_file = config_file
-        self.config = yaml.load(self.config_file)
+        config = yaml.load(self.config_file)
+
+        # load settings
+        # TODO: validate settings
+        # TODO: getters and setters so we can edit settings from cli
+        self.aws_region = config.get("aws_region")
+        self.vpc_id = config.get("vpc_id")
+        self.drone_deployment_id = config.get("drone_deployment_id")
+        self.drone_server_machine_name = config.get("drone_server_machine_name")
+        self.drone_server_hosted_zone = config.get("drone_server_hosted_zone")
+        self.drone_server_ami = config.get("drone_server_ami")
+        self.drone_server_key_pair_name = config.get("drone_server_key_pair_name")
+        self.drone_server_instance_type = config.get("drone_server_instance_type")
+        self.drone_server_allow_http = config.get("drone_server_allow_http")
+        self.drone_server_allow_https = config.get("drone_server_allow_https")
+        self.drone_server_allow_ssh = config.get("drone_server_allow_ssh")
+        self.config = config
 
     def __str__(self):
         '''returns pretty formatted yaml'''
         return str(ruamel.yaml.round_trip_dump(self.config))
 
     def write_config(self):
+        '''writes the self.config object to disk'''
         yaml = YAML()
         with open(self.config_file, 'w') as file:
             yaml.dump(self.config, file)
+
+    def plan():
+        pass
+
+    def apply():
+        pass

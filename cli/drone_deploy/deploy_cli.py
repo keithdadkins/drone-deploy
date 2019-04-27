@@ -12,7 +12,11 @@ from drone_deploy.deployment import Deployment
 @click.pass_obj
 def deploy(aws, deployment_name):
     """
-    Deploys <deployment-name> using Terraform.
+    Deploys <deployment-name> using Terraform. Deployment commands are just
+    convienience methods: they are the same as changing into the deployments
+    directory and running 'terraform plan', 'terraform apply' etc. The only
+    difference is that if you do not have terraform installed, this app will
+    run the commands using the 'terraform' docker image.
 
     The <deployment-name> must exist in the ./deployments directory.
 
@@ -20,7 +24,7 @@ def deploy(aws, deployment_name):
         drone-deploy deploy drone.mydomain.com
 
     Related:
-        drone-deploy [list, show, validate]
+        drone-deploy [list, show]
     """
     if aws.region is None:
         print("The AWS 'region' must be set before deployment..", file=sys.stderr)
@@ -34,6 +38,11 @@ def deploy(aws, deployment_name):
 
     # load the deployment
     deployment = Deployment(deployment_dir)
-    
+
     # apply
     click.echo(f"Deploying {deployment_name}")
+
+    # try:
+    #     deployment.plan()
+    #     deployment.apply()
+
