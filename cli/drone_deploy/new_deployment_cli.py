@@ -54,3 +54,11 @@ def new_deployment(name):
     # copy our configs and generate the config.yaml file
     copy_terraform_to(deployment_dir)
     generate_config_yaml(deployment_dir)
+    config_file = deployment_dir.joinpath('config.yaml').resolve()
+
+    click.echo(f"Deployment created: {deployment_dir}")
+    click.echo("Next steps:")
+    click.echo(f"  - edit the config.yaml file ('drone-deploy edit {name}')")
+    click.echo(f"  - run 'drone-deploy prepare {name}' to bootstrap the deployment.")
+    click.echo(f"  - run 'drone-deploy build-ami {name} to build the drone-server ami.")
+    click.echo(f"  - run 'drone-deploy plan|apply {name} to deploy.")
