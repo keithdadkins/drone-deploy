@@ -76,13 +76,16 @@ class Deployment():
 
     def setup_terraform(self):
         '''Setup our Terraform command wrapper.'''
-        tf_vars = [('aws_region', 'us-east-1'), ('vpc_id', '1234')]
         tf_dir = Path(self.config_file).parent.joinpath('terraform').resolve()
-        self.terraform = Terraform(tf_dir, tf_vars)
+        self.terraform = Terraform(tf_dir, tf_vars=[])
 
     def init(self):
         # run terraform init in the deployment dir
         self.terraform.init()
+
+    def bootstrap_roles_and_policies(self):
+        # setup needed iam roles and permissions for building/launching ami
+        self.terraform.bootstrap_roles_and_policies()
 
     def plan(self):
         self.terraform.plan()

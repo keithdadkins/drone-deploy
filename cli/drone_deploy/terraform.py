@@ -1,6 +1,5 @@
 import sys
 import subprocess
-from pathlib import Path
 
 
 class Terraform():
@@ -26,22 +25,12 @@ class Terraform():
         self.__use_local_cmd()
 
     def __use_local_cmd(self):
-        # '''Sets self.terraform function to use local terraform.'''
-        # try:
-        #     if "Terraform" not in subprocess.run(
-        #             ["terraform", "version"], capture_output=True, text=True
-        #     ).stdout:
-        #         print("Couldn't locate 'terraform'. Try installing with your favorite packer"
-        #               "manager, or download it from https://www.terraform.io/downloads.html")
-        #         sys.exit()
-        # except Exception as e:
-        #     print(type(e))
-        #     print(e.args)
-        #     print(e)
-
         # terraform is installed
-        def terraform(command):
-            command = f"terraform {command} {self.tf_vars}"
+        def terraform(command, tf_targets=None):
+            if tf_targets:
+                command = f"terraform {command} {self.tf_vars} {tf_targets}"
+            else:
+                command = f"terraform {command} {self.tf_vars}"
             p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                                  cwd=self.working_dir)
             while True:
@@ -57,12 +46,9 @@ class Terraform():
         '''TODO: Use docker to run terraform.'''
         pass
 
-    def init(self):
-        self.terraform("init")
-
     @property
     def tf_vars(self):
-        """returns formatted vars ready for terraform cmd ex. -var='foo=bar' -var='biz=baz'"""
+        """Returns formatted vars ready for terraform cmd ex. -var='foo=bar' -var='biz=baz'"""
         output = ' '.join(["-var '{0}={1}'".format(k, v) for k, v in self.__tf_vars.items()])
         return output
 
@@ -71,12 +57,30 @@ class Terraform():
         # unpacks tf vars (a list of tuples) into a dict
         self.__tf_vars = {k: v for k, v in tf_vars}
 
+    def init(self):
+        self.terraform("init")
+
     def plan(self):
-        self.terraform("plan")
+        '''Runs 'terraform plan' in the working directory.'''
+        self.terraform("plan", self.tf_vars, self.tf_targets)
 
-    def apply():
+    def apply(self):
+        '''Runs 'terraform apply' in the working directory.'''
+        self.terraform("apply", self.tf_targets)
+
+    def bootstrap_roles_and_policies(self):
+        '''Applies needed IAM roles and policies for building/deploying ami.'''
+        targets = ' '.join("-target={}".format(t) for t in [
+            "aws_iam_policy.drone-builder-ec2",
+            "aws_iam_policy.drone-builder-s3",
+            "aws_iam_policy_attachment.ec2",
+            "aws_iam_policy_attachment.s3",
+            "aws_iam_instance_profile.drone-builder"
+        ])
+        self.terraform("apply", targets)
+
+    def status(self):
         pass
-
 
 # wkdir = Path.cwd().parent.joinpath('deployments/foo/terraform').resolve()
 # wkdir = "/Users/foo/projects/podchaser-drone-ami-builder/deployments/foo/terraform"

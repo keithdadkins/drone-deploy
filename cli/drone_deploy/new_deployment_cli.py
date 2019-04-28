@@ -1,7 +1,6 @@
 import click
 import shutil
 from pathlib import Path
-from drone_deploy.terraform import Terraform
 
 
 def create_deployment_dir_if_not_exists(name):
@@ -36,7 +35,7 @@ def generate_config_yaml(deployment_dir):
 @click.argument('name')
 def new_deployment(name):
     """
-    Initializes a new deployment.
+    Creates a new deployment in the /deployments directory.
 
     Usage:
         `drone-deploy new NAME`
@@ -55,8 +54,3 @@ def new_deployment(name):
     # copy our configs and generate the config.yaml file
     copy_terraform_to(deployment_dir)
     generate_config_yaml(deployment_dir)
-
-    # run terraform init in the new config directory
-    terraform_path = Path.cwd().joinpath('deployments', name, 'terraform')
-    tf = Terraform(terraform_path)
-    tf.init()
