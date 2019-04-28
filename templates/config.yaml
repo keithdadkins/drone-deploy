@@ -1,23 +1,23 @@
 ### DEPLOYMENT CONFIG FILE #############################################
 # The 'drone-deploy' cli app uses this file to configure terraform.
-# Specifically, it creates a terraform.tfvars file in the ./terraform
-# directory, which is automatically loaded during deployments.
+# Any of these values can be overidden by exporting a corresponding env
+# var. E.g, export DRONE_AWS_REGION=us-east-2 overwrites drone_aws_region
 #########################################################################
 ## WHERE TO DEPLOY
-aws_region: us-east-1
-vpc_id: ""
+drone_aws_region: us-east-1
+drone_vpc_id: ""
 
 
 ## ROUTE53 DOMAIN
 # I.E., 'drone.yourdomain.com'
-host_name: drone
-hosted_zone: yourdomain.com
+drone_server_host_name: drone
+drone_server_hosted_zone: yourdomain.com
 
 
 ## DRONE SERVER INSTANCE SETTINGS
 drone_server_key_pair_name: ""
 drone_server_instance_type: t2.micro
-docker_compose_version: 1.24.0
+drone_docker_compose_version: 1.24.0
 
 
 ## DRONE SERVER FIREWALL ACL'S (aws security groups)
@@ -48,9 +48,9 @@ drone_user_filter:
 
 
 # GITHUB OATH SETTINGS
-github_server: https://github.com
-github_client_id: 12345678903423
-github_client_secret: abcdefghijklmnopqrtub123555afd34134
+drone_github_server: https://github.com
+drone_github_client_id: 12345678903423
+drone_github_client_secret: abcdefghijklmnopqrtub123555afd34134
 
 
 # DRONE SETTINGS
