@@ -36,13 +36,8 @@ def deploy(aws, deployment_name):
                    "Run 'drone-deploy list' to see available deployemnts.")
         return False
 
-    # load the deployment
-    deployment = Deployment(deployment_dir)
-
+    # # load the deployment
+    # deployment = Deployment(deployment_dir)
+    
     # apply
     click.echo(f"Deploying {deployment_name}")
-
-    # try:
-    #     deployment.plan()
-    #     deployment.apply()
-

@@ -1,5 +1,7 @@
 import ruamel.yaml
 from ruamel.yaml import YAML
+from pathlib import Path
+from drone_deploy.terraform import Terraform
 
 
 class Deployment():
@@ -44,9 +46,8 @@ class Deployment():
         self.config_file = config_file
         config = yaml.load(self.config_file)
 
-        # load settings
+        # load settings from config file
         # TODO: validate settings
-        # TODO: getters and setters so we can edit settings from cli
         self.aws_region = config.get("aws_region")
         self.vpc_id = config.get("vpc_id")
         self.drone_deployment_id = config.get("drone_deployment_id")
@@ -60,6 +61,9 @@ class Deployment():
         self.drone_server_allow_ssh = config.get("drone_server_allow_ssh")
         self.config = config
 
+        # prepare terraform for running commands
+        self.setup_terraform()
+
     def __str__(self):
         '''returns pretty formatted yaml'''
         return str(ruamel.yaml.round_trip_dump(self.config))
@@ -70,8 +74,18 @@ class Deployment():
         with open(self.config_file, 'w') as file:
             yaml.dump(self.config, file)
 
-    def plan():
-        pass
+    def setup_terraform(self):
+        '''Setup our Terraform command wrapper.'''
+        tf_vars = [('aws_region', 'us-east-1'), ('vpc_id', '1234')]
+        tf_dir = Path(self.config_file).parent.joinpath('terraform').resolve()
+        self.terraform = Terraform(tf_dir, tf_vars)
+
+    def init(self):
+        # run terraform init in the deployment dir
+        self.terraform.init()
+
+    def plan(self):
+        self.terraform.plan()
 
     def apply():
         pass

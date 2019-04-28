@@ -6,7 +6,7 @@ import boto3.session
 import botocore.exceptions
 from pathlib import Path
 from dotenv import load_dotenv
-from drone_deploy import new_deployment, bootstrap, list_deployments, deploy, show
+from drone_deploy import new_deployment, list_deployments, deploy, show, plan, init_terraform
 
 
 def check_dir():
@@ -74,7 +74,7 @@ def cli(ctx, region):
     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     aws_session_token = os.getenv("AWS_SESSION_TOKEN")
     if region is None:
-        region = os.getenv("DRONE_REGION")
+        region = os.getenv("DRONE_REGION", os.getenv('AWS_REGION'))
 
     # create an aws session and set it's region. We will pass this around the cli app
     # in the 'ctx' context object.
@@ -99,8 +99,10 @@ if getattr(sys, 'frozen', False):
 
 
 # hookup 'drone-deploy' sub commands
-cli.add_command(bootstrap)
+# cli.add_command(bootstrap)
 cli.add_command(new_deployment)
 cli.add_command(list_deployments)
 cli.add_command(deploy)
 cli.add_command(show)
+cli.add_command(plan)
+cli.add_command(init_terraform)
