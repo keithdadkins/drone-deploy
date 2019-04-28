@@ -1,5 +1,11 @@
 ## drone-deploy
 deployments/
+terraform/
+packer/
+README.bak*
+TODO
+drone-deploy
+cli/drone_deploy/*.bak
 
 ## OS-X and generic ignores
 .DS_Store

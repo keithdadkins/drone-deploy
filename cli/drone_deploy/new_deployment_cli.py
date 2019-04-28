@@ -7,16 +7,25 @@ def create_deployment_dir_if_not_exists(name):
     '''Returns a path to the deployment directory. Creates directories as needed'''
     try:
         deployment_path = Path.cwd().joinpath('deployments', name)
-        # make /deployments/foo/terraform
         terraform_path = deployment_path.joinpath('terraform')
+        # packer_path = deployment_path.joinpath('packer')
         Path(terraform_path).mkdir(exist_ok=False, parents=True)
+        # Path(packer_path).mkdir(exist_ok=False, parents=True)
     except FileExistsError:
         return False
-    # return the full path
+    # return the path to the deploymen
     return deployment_path.resolve()
 
 
-def copy_terraform_to(deployment_dir):
+def copy_packer_templates_to(deployment_dir):
+    '''copy packer templates to deployment dir'''
+    template_path = Path.cwd().joinpath('templates', 'packer')
+    deployment_path = deployment_dir.joinpath('packer')
+    print(deployment_path)
+    shutil.copytree(template_path, deployment_path)
+
+
+def copy_terraform_templates_to(deployment_dir):
     '''copy terraform templates to new deployment folder'''
     # copies /templates/terraform/*.tf* to /deployments/foo/terraform/
     template_path = Path.cwd().joinpath('templates', 'terraform')
@@ -52,9 +61,9 @@ def new_deployment(name):
         return False
 
     # copy our configs and generate the config.yaml file
-    copy_terraform_to(deployment_dir)
+    copy_terraform_templates_to(deployment_dir)
+    copy_packer_templates_to(deployment_dir)
     generate_config_yaml(deployment_dir)
-    config_file = deployment_dir.joinpath('config.yaml').resolve()
 
     click.echo(f"Deployment created: {deployment_dir}")
     click.echo("Next steps:")
