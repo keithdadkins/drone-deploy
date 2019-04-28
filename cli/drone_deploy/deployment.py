@@ -47,7 +47,6 @@ class Deployment():
         config = yaml.load(self.config_file)
 
         # load settings from config file
-        # TODO: validate settings
         self.aws_region = config.get("aws_region")
         self.vpc_id = config.get("vpc_id")
         self.drone_deployment_id = config.get("drone_deployment_id")
@@ -89,6 +88,3 @@ class Deployment():
 
     def plan(self):
         self.terraform.plan()
-
-    def apply():
-        pass

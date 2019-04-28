@@ -1,3 +1,6 @@
+## drone-deploy
+deployments/
+
 ## OS-X and generic ignores
 .DS_Store
 */logs
