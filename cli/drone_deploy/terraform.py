@@ -13,6 +13,12 @@ class Terraform():
     working_dir: directory
         The full path to the directory with .tf resources.
 
+    Optional Attributes
+    ----------
+    tf_vars: list
+        A list of terraform varibles (in key, value pairs format) to
+        run with each terraform command (apply, plan, etc).
+
     Methods
     -------
 
@@ -60,13 +66,13 @@ class Terraform():
     def init(self):
         self.terraform("init")
 
-    def plan(self):
+    def plan(self, tf_targets=[]):
         '''Runs 'terraform plan' in the working directory.'''
-        self.terraform("plan", self.tf_vars, self.tf_targets)
+        self.terraform("plan", tf_targets)
 
-    def apply(self):
+    def apply(self, tf_targets=[]):
         '''Runs 'terraform apply' in the working directory.'''
-        self.terraform("apply", self.tf_targets)
+        self.terraform("apply", tf_targets)
 
     def bootstrap_roles_and_policies(self):
         '''Applies needed IAM roles and policies for building/deploying ami.'''
