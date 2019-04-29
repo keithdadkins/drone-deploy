@@ -1,7 +1,7 @@
 resource "aws_security_group" "drone-server" {
     name        = "drone-server"
     description = "drone-server-sg-access-rules"
-    vpc_id      = "${var.vpc_id}"
+    vpc_id      = "${var.drone_vpc_id}"
 
     ingress {
         from_port       = 80

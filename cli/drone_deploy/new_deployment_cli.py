@@ -21,8 +21,11 @@ def copy_packer_templates_to(deployment_dir):
     '''copy packer templates to deployment dir'''
     template_path = Path.cwd().joinpath('templates', 'packer')
     deployment_path = deployment_dir.joinpath('packer')
-    print(deployment_path)
     shutil.copytree(template_path, deployment_path)
+
+    # copy the ami build script to the deployment directory
+    build_script = Path.cwd().joinpath('build-drone-server-ami.sh').resolve()
+    shutil.copy(build_script, deployment_dir)
 
 
 def copy_terraform_templates_to(deployment_dir):

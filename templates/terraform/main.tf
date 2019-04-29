@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" { }
 
 # set aws region
 provider "aws" {
-  region              = "${var.aws_region}"
+  region              = "${var.drone_aws_region}"
 }
 
 # drone-server instance

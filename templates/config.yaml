@@ -29,12 +29,12 @@ drone_docker_compose_version: 1.24.0
 # 0.0.0.0/0 == 'Allow all ip addresses.'
 # /32 == 'one ip address'
 drone_server_allow_http:
-- 0.0.0.0/0
+- "0.0.0.0/0"
 drone_server_allow_https:
-- 0.0.0.0/0
+- "0.0.0.0/0"
 drone_server_allow_ssh:
-- your.public.ip.address/32
-- another.admins.ip.address/32
+- "your.public.ip.address/32"
+- "another.admins.ip.address/32"
 
 # note: if you do not need ssh access to the drone-server, remove them
 
@@ -65,4 +65,4 @@ drone_server_docker_image: drone/drone:1
 # can be edited directly if needed.
 drone_server_ami: ""
 drone_deployment_id: ""
-drone_builder_arn: ""
+drone_builder_role_arn: ""

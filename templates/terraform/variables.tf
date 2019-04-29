@@ -1,10 +1,10 @@
 # vpc
-variable "vpc_id" {
+variable "drone_vpc_id" {
     description = "The vpc id where you want drone to be deployed."
 }
 
 # region
-variable "aws_region" {
+variable "drone_aws_region" {
     description = "AWS region we are deploying drone into."
 }
 

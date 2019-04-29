@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 
@@ -37,8 +38,12 @@ class Terraform():
                 command = f"terraform {command} {self.tf_vars} {tf_targets}"
             else:
                 command = f"terraform {command} {self.tf_vars}"
+
+            # pass our env vars along to the sub process
+            env = os.environ
+            print(self.tf_vars)
             p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
-                                 cwd=self.working_dir)
+                                 cwd=self.working_dir, env=env)
             while True:
                 out = p.stderr.read(1)
                 if out == '' and p.poll() is not None:

@@ -8,7 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from drone_deploy import new_deployment, prepare_deployment,\
                          list_deployments, show, plan, deploy,\
-                         edit_deployment
+                         edit_deployment, build_ami
 
 
 def check_dir():
@@ -105,6 +105,7 @@ if getattr(sys, 'frozen', False):
 cli.add_command(new_deployment)
 cli.add_command(edit_deployment)
 cli.add_command(prepare_deployment)
+cli.add_command(build_ami)
 cli.add_command(list_deployments)
 cli.add_command(show)
 cli.add_command(plan)
