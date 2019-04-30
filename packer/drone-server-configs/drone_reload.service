@@ -1,7 +1,0 @@
-[Unit]
-Description=Refreshes drone images and updates containers
-
-[Service]
-Type=oneshot
-
-ExecStart=/bin/systemctl reload-or-restart drone.service
