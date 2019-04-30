@@ -13,7 +13,7 @@ from drone_deploy import new_deployment, prepare_deployment,\
 
 def check_dir():
     '''ensure we are running in project root'''
-    if not Path('terraform').exists() or not Path('drone-deploy').exists():
+    if not Path('templates').exists():
         click.echo("drone-deploy must be run from the project root directoy.")
         sys.exit("Exiting.")
 
