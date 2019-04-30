@@ -35,3 +35,7 @@ def prepare_deployment(deployment_name):
     deployment = Deployment(deployment_dir)
     deployment.init()
     deployment.bootstrap_roles_and_policies()
+
+    # get the drone_builder_role_arn that was generated during the bootstrap
+    # ie., sets deployment.drone_builder_role_arn
+    deployment.load_tf_outputs()

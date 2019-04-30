@@ -43,9 +43,14 @@ class Deployment():
 
     def __load_param(self, param_name):
         '''load config from env or from config.yaml if env is not set'''
-        param = os.getenv(param_name.upper()) or self.config.get(param_name, None)
-        if param_name == "aws_region":
-            self.config.get(param_name, self.config['drone_aws_region'])
+        if os.getenv(param_name.upper()):
+            # env var exists TODO: test if counts null/unset vars as valid
+            param = os.getenv(param_name.upper())
+        else:
+            # set the param and export as env var
+            param = self.config.get(param_name, '')
+            os.environ[param_name.upper()] = str(param)
+
         self.config[param_name] = param
 
         # handle yaml arrays to hcl array
@@ -55,7 +60,6 @@ class Deployment():
             self.tf_vars.append((param_name, patched_param))
         else:
             self.tf_vars.append((param_name, f"\"{param}\""))
-            print(param)
         return param
 
     def __init__(self, config_file):
@@ -94,11 +98,16 @@ class Deployment():
         self.__load_param("drone_server_ami")
         self.__load_param("drone_deployment_id")
         self.__load_param("drone_builder_role_arn")
+        self.__load_param("aws_cli_base_image")
         self.__load_param("aws_region")
+        self.__load_param("drone_server_base_ami")
 
         # prepare terraform for running commands
         self.setup_terraform()
         self.setup_packer()
+
+        # load any terraform outputs if they exists
+        self.load_tf_outputs()
 
     def __str__(self):
         '''returns pretty formatted yaml'''
@@ -132,11 +141,32 @@ class Deployment():
         self.terraform.plan()
 
     def build_ami(self):
+        # build the ami
         self.packer.build_ami()
+
+        # set build artifacts (overides existing env vars)
+        try:
+            self.drone_deployment_id = self.packer.drone_deployment_id
+            self.drone_server_ami = self.packer.ami_id
+            os.environ['DRONE_DEPLOYMENT_ID'] = self.drone_deployment_id
+            os.environ['DRONE_SERVER_AMI'] = self.drone_server_ami
+        except AttributeError:
+            print("Could not load deployment. Check your settings and try rebuilding the ami.")
 
     def deploy(self):
         '''apply terraform resources'''
-        # TODO: get from env
-        os.environ['DRONE_BUILDER_ROLE_ARN'] = "arn:aws:iam::566612972112:role/drone-builder-role"
-        print(self.terraform.tf_vars)
         self.terraform.apply()
+
+    def destroy(self):
+        '''destroys terraform resources'''
+        self.terraform.destroy()
+
+    def load_tf_outputs(self):
+        '''Load tf outputs into atributes'''
+        # DRONE_BUILDER_ROLE_ARN
+        # dynamically generated during bootstrap process
+        try:
+            self.config["drone_builder_role_arn"] = self.terraform.drone_builder_role_arn
+            os.environ['DRONE_BUILDER_ROLE_ARN'] = self.drone_builder_role_arn
+        except AttributeError:
+            pass
