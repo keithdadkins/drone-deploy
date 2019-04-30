@@ -8,12 +8,11 @@ def create_deployment_dir_if_not_exists(name):
     try:
         deployment_path = Path.cwd().joinpath('deployments', name)
         terraform_path = deployment_path.joinpath('terraform')
-        # packer_path = deployment_path.joinpath('packer')
         Path(terraform_path).mkdir(exist_ok=False, parents=True)
-        # Path(packer_path).mkdir(exist_ok=False, parents=True)
     except FileExistsError:
         return False
-    # return the path to the deploymen
+
+    # return the path to the deployment
     return deployment_path.resolve()
 
 
@@ -23,10 +22,6 @@ def copy_packer_templates_to(deployment_dir):
     deployment_path = deployment_dir.joinpath('packer')
     shutil.copytree(template_path, deployment_path)
 
-    # copy the ami build script to the deployment directory
-    build_script = Path.cwd().joinpath('build-drone-server-ami.sh').resolve()
-    shutil.copy(build_script, deployment_dir)
-
 
 def copy_terraform_templates_to(deployment_dir):
     '''copy terraform templates to new deployment folder'''
@@ -35,6 +30,12 @@ def copy_terraform_templates_to(deployment_dir):
     deployment_path = deployment_dir.joinpath('terraform')
     for file in template_path.glob('*.tf*'):
         shutil.copy(file, deployment_path)
+
+
+def copy_build_script_to(deployment_dir):
+    # copy the ami build script to the deployment directory
+    build_script = Path.cwd().joinpath('templates', 'build-drone-server-ami.sh').resolve()
+    shutil.copy(build_script, deployment_dir)
 
 
 def generate_config_yaml(deployment_dir):
@@ -66,6 +67,7 @@ def new_deployment(name):
     # copy our configs and generate the config.yaml file
     copy_terraform_templates_to(deployment_dir)
     copy_packer_templates_to(deployment_dir)
+    copy_build_script_to(deployment_dir)
     generate_config_yaml(deployment_dir)
 
     click.echo(f"Deployment created: {deployment_dir}")

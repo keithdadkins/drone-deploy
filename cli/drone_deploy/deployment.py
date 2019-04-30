@@ -51,15 +51,32 @@ class Deployment():
             param = self.config.get(param_name, '')
             os.environ[param_name.upper()] = str(param)
 
-        self.config[param_name] = param
+        if param_name == "drone_builder_role_arn":
+            self.config[param_name] = self.terraform.drone_builder_role_arn
+        else:
+            self.config[param_name] = param
+
+        if param_name == "drone_deployment_id" and not param:
+            self.config[param_name] = self.packer.drone_deployment_id
+            os.environ[param_name.upper()] = self.config[param_name]
+            param = self.config[param_name]
+
+        if param_name == "drone_server_ami" and not param:
+            self.config[param_name] = self.packer.drone_server_ami
+            os.environ[param_name.upper()] = self.config[param_name]
+            param = self.config[param_name]
 
         # handle yaml arrays to hcl array
         if type(param) == ruamel.yaml.comments.CommentedSeq:
             # array
             patched_param = str(param).replace("'", '"')
             self.tf_vars.append((param_name, patched_param))
+            param = patched_param
         else:
             self.tf_vars.append((param_name, f"\"{param}\""))
+
+        # export params to for terraform
+        os.environ[f"TF_VAR_{param_name.lower()}"] = str(param)
         return param
 
     def __init__(self, config_file):
@@ -69,7 +86,7 @@ class Deployment():
         self.config_file = config_file
         self.config = yaml.load(self.config_file)
 
-        # list of tuples we want to pass along to terraform (added in __load_params)
+        # list of tuples we want to pass along to terraform/packer (added in __load_params)
         self.tf_vars = []
 
         # load deployment settings from env or config.yaml if env is not set
@@ -95,19 +112,25 @@ class Deployment():
         self.__load_param("drone_server_host")
         self.__load_param("drone_cli_version")
         self.__load_param("drone_server_docker_image")
-        self.__load_param("drone_server_ami")
-        self.__load_param("drone_deployment_id")
-        self.__load_param("drone_builder_role_arn")
+        self.__load_param("drone_agent_docker_image")
         self.__load_param("aws_cli_base_image")
-        self.__load_param("aws_region")
         self.__load_param("drone_server_base_ami")
+        # self.__load_param("aws_region")
 
-        # prepare terraform for running commands
+        # prepare terraform
         self.setup_terraform()
+        self.__load_param("drone_builder_role_arn")
+        
+        # prepare packer
         self.setup_packer()
+        self.__load_param("drone_deployment_id")
+        self.__load_param("drone_server_ami")
 
-        # load any terraform outputs if they exists
-        self.load_tf_outputs()
+        # is this a new deployment?
+        if self.packer.new_build and self.terraform.has_tf_state:
+            self.new_deployment = True
+        else:
+            self.new_deployment = False
 
     def __str__(self):
         '''returns pretty formatted yaml'''
@@ -127,15 +150,12 @@ class Deployment():
     def setup_packer(self):
         '''Setup our Packer command wrapper.'''
         packer_dir = Path(self.config_file).parent.joinpath('packer').resolve()
-        self.packer = Packer(packer_dir)
+        packer_vars = [(k, v) for k, v in self.config.items()]
+        self.packer = Packer(packer_dir, packer_vars=packer_vars)
 
     def init(self):
         # run terraform init in the deployment dir
         self.terraform.init()
-
-    def bootstrap_roles_and_policies(self):
-        # setup needed iam roles and permissions for building/launching ami
-        self.terraform.bootstrap_roles_and_policies()
 
     def plan(self):
         self.terraform.plan()
@@ -144,29 +164,36 @@ class Deployment():
         # build the ami
         self.packer.build_ami()
 
-        # set build artifacts (overides existing env vars)
-        try:
-            self.drone_deployment_id = self.packer.drone_deployment_id
-            self.drone_server_ami = self.packer.ami_id
-            os.environ['DRONE_DEPLOYMENT_ID'] = self.drone_deployment_id
-            os.environ['DRONE_SERVER_AMI'] = self.drone_server_ami
-        except AttributeError:
-            print("Could not load deployment. Check your settings and try rebuilding the ami.")
+        # # set build artifacts (overides existing env vars)
+        # try:
+        #     self.drone_deployment_id = self.packer.drone_deployment_id
+        #     self.drone_server_ami = self.packer.ami_id
+        #     os.environ['DRONE_DEPLOYMENT_ID'] = self.drone_deployment_id
+        #     os.environ['DRONE_SERVER_AMI'] = self.drone_server_ami
+        # except AttributeError:
+        #     print("Could not load deployment. Check your settings and try rebuilding the ami.")
 
-    def deploy(self):
+    def deploy(self, targets=[]):
         '''apply terraform resources'''
-        self.terraform.apply()
+        self.terraform.apply(targets)
 
     def destroy(self):
         '''destroys terraform resources'''
         self.terraform.destroy()
 
-    def load_tf_outputs(self):
-        '''Load tf outputs into atributes'''
-        # DRONE_BUILDER_ROLE_ARN
-        # dynamically generated during bootstrap process
-        try:
-            self.config["drone_builder_role_arn"] = self.terraform.drone_builder_role_arn
-            os.environ['DRONE_BUILDER_ROLE_ARN'] = self.drone_builder_role_arn
-        except AttributeError:
-            pass
+    def deployment_status(self, deployment_name):
+        '''returns the state of the deployment'''   
+
+        # if self.terraform.has_tf_state:
+        #     items = self.terraform.tf_state['modules'][0]['resources']
+        # else:
+        #     items = {}
+
+        # print("The following resources have been deployed:")
+        # for k, v in items.items():
+        #     print(f"    {k}")
+
+        # packer
+        if self.packer.new_build:
+            print(f"AMI has not been built. Run 'drone-deploy prepare {deployment_name}'"
+                  f"and 'drone-deploy build-ami {deployment_name}' to build")

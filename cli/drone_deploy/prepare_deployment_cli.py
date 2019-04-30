@@ -1,3 +1,4 @@
+import os
 import click
 from pathlib import Path
 from drone_deploy.deployment import Deployment
@@ -34,8 +35,20 @@ def prepare_deployment(deployment_name):
     # load the deployment, run terraform init, and apply roles and policies
     deployment = Deployment(deployment_dir)
     deployment.init()
-    deployment.bootstrap_roles_and_policies()
+
+    # Apply needed IAM roles and policies for building/deploying ami
+    targets = ' '.join("-target={}".format(t) for t in [
+        "aws_iam_policy.drone-builder-ec2",
+        "aws_iam_policy.drone-builder-s3",
+        "aws_iam_policy_attachment.ec2",
+        "aws_iam_policy_attachment.s3",
+        "aws_iam_instance_profile.drone-builder"
+    ])
+    # breakpoint()
+    # print(os.environ)
+    deployment.deploy(targets)
+    # deployment.bootstrap_roles_and_policies()
 
     # get the drone_builder_role_arn that was generated during the bootstrap
     # ie., sets deployment.drone_builder_role_arn
-    deployment.load_tf_outputs()
+    # deployment.load_tf_outputs()

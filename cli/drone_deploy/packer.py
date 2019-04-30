@@ -52,7 +52,7 @@ class Packer():
         return output
 
     @packer_vars.setter
-    def packer_vars(self, packer_vars):
+    def packer_vars(self, packer_vars=[]):
         # unpacks packers vars (a list of tuples) into a dict
         self.__packer_vars = {k: v for k, v in packer_vars}
 
@@ -65,12 +65,16 @@ class Packer():
                 self.manifest = json.load(read_file)
             # artifact_id = region:ami (us-east-1:ami-adfsdf23423443)
             build = self.manifest["builds"][0]["artifact_id"].split(':')
-            self.ami_id = build[1]
+            self.drone_server_ami = build[1]
 
             # drone_deploy_id
             deploy_id = self.manifest["builds"][0]["custom_data"]["drone_deployment_id"]
             self.drone_deployment_id = deploy_id
+            self.new_build = False
         except FileNotFoundError:
+            self.new_build = True
+            self.drone_deployment_id = ''
+            self.drone_server_ami = ''
             pass
 
     def get_deployment_id(self):
@@ -88,8 +92,8 @@ class Packer():
         # run the build script in the deployment directory
         build_dir = Path(self.working_dir.parent.resolve())
         command = "./build-drone-server-ami.sh -p"
-        for k, v in os.environ.items():
-            print(f"{k}={v}")
+        # for k, v in os.environ.items():
+        #     print(f"{k}={v}")
         try:
             p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                                  cwd=build_dir, env=os.environ)

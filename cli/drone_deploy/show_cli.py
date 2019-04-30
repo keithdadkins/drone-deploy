@@ -18,3 +18,6 @@ def show(deployment_name):
     # load the deployment
     deployment = Deployment(deployment_dir)
     click.echo(deployment)
+
+    # TEMP
+    deployment.deployment_status(deployment_name)

@@ -16,16 +16,19 @@ DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
 
 # drone settings
-DRONE_REGION="${DRONE_REGION:-}"
-DRONE_VPC_ID="${DRONE_VPC_ID:-}"
-DRONE_RPC_SECRET="${DRONE_RPC_SECRET:-}"
+DRONE_CLI_VERSION="${DRONE_CLI_VERSION}"
+DRONE_DOCKER_COMPOSE_VERSION="${DRONE_DOCKER_COMPOSE_VERSION}"
+DRONE_AWS_REGION="${DRONE_AWS_REGION:-}"
+DRONE_SERVER_DOCKER_IMAGE="${DRONE_SERVER_DOCKER_IMAGE:-}"
+DRONE_AGENT_DOCKER_IMAGE="${DRONE_AGENT_DOCKER_IMAGE:-}"
 DRONE_SERVER_HOST="${DRONE_SERVER_HOST:-}"
+DRONE_RPC_SECRET="${DRONE_RPC_SECRET:-}"
+DRONE_VPC_ID="${DRONE_VPC_ID:-}"
 DRONE_ADMIN="${DRONE_ADMIN:-}"
 DRONE_USER_FILTER="${DRONE_USER_FILTER:-}"
 DRONE_GITHUB_CLIENT_ID="${DRONE_GITHUB_CLIENT_ID:-}"
 DRONE_GITHUB_CLIENT_SECRET="${DRONE_GITHUB_CLIENT_SECRET:-}"
 DRONE_S3_BUCKET="${DRONE_S3_BUCKET:-}"
-DRONE_IMAGE="${DRONE_IMAGE:-drone/drone:latest}"
 
 
 # defaults for docker images
@@ -225,7 +228,7 @@ put_parameter(){
 
     # put the parameter
     printf "    adding '$key'... "
-    if $aws ssm put-parameter --name "$key" --value "$value" --type String --region "$DRONE_REGION" > /dev/null 2>&1; then
+    if $aws ssm put-parameter --name "$key" --value "$value" --type String --region "$DRONE_AWS_REGION" > /dev/null 2>&1; then
         echo "OK"
     else
         echo "X"
@@ -248,7 +251,7 @@ put_secret_parameter(){
 
     # put the parameter
     printf "    adding secret '$key'... "
-    if $aws ssm put-parameter --name "$key" --value "$value" --type SecureString --region "$DRONE_REGION" > /dev/null 2>&1; then
+    if $aws ssm put-parameter --name "$key" --value "$value" --type SecureString --region "$DRONE_AWS_REGION" > /dev/null 2>&1; then
         echo "OK"
     else
         echo "X"
@@ -261,6 +264,7 @@ put_secret_parameter(){
 build_drone_server_ami(){
     echo "Building AMI... "
     packer_build_cmd="$docker run --rm -v $(PWD)/packer:/tmp/packer --workdir=/tmp/packer hashicorp/packer:light build"
+    # note: ${VARNAME%%[[:cntrl:]]} removes trailing /r's from strings. dang tty's.
 
     # note: ${VARNAME%%[[:cntrl:]]} removes trailing /r's from strings. dang tty's.
     $packer_build_cmd \
@@ -268,11 +272,12 @@ build_drone_server_ami(){
         -var aws_secret_key="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY%%[[:cntrl:]]}" \
         -var aws_session_token="${DRONE_BUILDER_AWS_SESSION_TOKEN%%[[:cntrl:]]}" \
         -var drone_deployment_uuid="${DRONE_DEPLOYMENT_ID%%[[:cntrl:]]}" \
-        -var aws_region="$DRONE_REGION" \
-        -var drone_region="$DRONE_REGION" \
-        -var drone_version="$DRONE_VERSION" \
-        -var drone_image="$DRONE_IMAGE" \
-        -var docker_compose_version="$DOCKER_COMPOSE_VERSION" \
+        -var drone_aws_region="$DRONE_AWS_REGION" \
+        -var aws_region="$DRONE_AWS_REGION" \
+        -var drone_cli_version="$DRONE_CLI_VERSION" \
+        -var drone_server_docker_image="$DRONE_SERVER_DOCKER_IMAGE" \
+        -var drone_agent_docker_image="$DRONE_AGENT_DOCKER_IMAGE" \
+        -var drone_docker_compose_version="$DRONE_DOCKER_COMPOSE_VERSION" \
         -var iam_instance_profile="drone-builder" \
         packer_build_drone_server_ami.json
 }
@@ -359,9 +364,10 @@ build(){
     prefix="drone.$DRONE_DEPLOYMENT_ID"
 
     # non-secret paramaters
-    put_parameter "$prefix.DRONE_REGION" "$DRONE_REGION"
-    put_parameter "$prefix.DRONE_SERVER_HOST" "$DRONE_SERVER_HOST"
-    put_parameter "$prefix.DRONE_IMAGE" "$DRONE_IMAGE"
+    put_parameter "$prefix.DRONE_AWS_REGION" "$DRONE_AWS_REGION"
+    put_parameter "$prefix.DRONE_SERVER_HOST" "'$DRONE_SERVER_HOST'"
+    put_parameter "$prefix.DRONE_SERVER_DOCKER_IMAGE" "'$DRONE_SERVER_DOCKER_IMAGE'"
+    put_parameter "$prefix.DRONE_AGENT_DOCKER_IMAGE" "'$DRONE_AGENT_DOCKER_IMAGE'"
 
     # secret paramaters
     put_secret_parameter "$prefix.DRONE_ADMIN" "$DRONE_ADMIN"
