@@ -17,8 +17,8 @@ Ultimately, we will use drone to deploy and manage updates to itself, but we nee
 ### Bootstrap steps
 
 1. Create a new [OAuth application for drone in githhub](https://github.com/settings/developers) in your github account settings.
-2. Clone the repo and edit project settings.
-3. Setup IAM roles and policies.
+2. Clone the repo, create a new deployment, and edit the config.yaml.
+3. Prepare the deployment (sets up IAM roles and policies).
 4. Build the drone server AMI.
 5. Deploy drone.
 
@@ -38,7 +38,7 @@ Once done, view the oath app and take note of the `Client ID` and `Client Secret
 
 > *Note: it's important to make sure the callback url ends with '/login'*
 
-#### 2. Clone the repo and edit project settings.
+#### 2. Clone the repo, create new deployment, and edit config.yaml.
 
 Clone the repo
 
@@ -47,52 +47,74 @@ git clone git@github.com:keithdadkins/drone.podchaser.com.git
 cd drone.podchaser.com
 ```
 
-Edit and source project settings
+Create a new project
+
+```shell
+drone-deploy new drone.yourdomain.com
+```
+
+Edit config.yaml
+
+You will need the following information:
+
+- The aws region and vpc id of the vpc you want to deploy drone into
+- The route53 hosted zone and machine name for drone (e.g., drone.yourdomain.com)
+- An ec2 key-pair to use to ssh into the drone server (either existing or create new ones)
+- Your public ip address (to allow ssh connections)
+- The github username of the drone admin
+- The github organization or github username(s) of each person you want to allow access to drone.
+
 
 ```shell
 cp .env.example .env
 vi .env
 source .env
+drone-deploy edit drone.yourdomain.com
 ```
 
-#### 3. Setup IAM Roles and Policies
+You can view the current state of the deployments config file by:
+
+```shell
+drone-deploy show drone.yourdomain.com
+```
+
+#### 3. Prepare the deployment (sets up IAM roles and policies).
 
 > !! __IMPORTANT__ You cannot use an AWS root account when deploying this project. This is because a root account cannot call the AssumeRole api (you will get 'access is denied') and the scripts will fail. https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#lock-away-credentials
 
-```shell
-cd terraform
-terraform apply -target=aws_iam_policy.drone-builder-ec2 \
-                -target=aws_iam_policy.drone-builder-s3 \
-                -target=aws_iam_policy_attachment.ec2 \
-                -target=aws_iam_policy_attachment.s3 \
-                -target=aws_iam_instance_profile.drone-builder
-cd ..
-```
-
-This will ensure the appropriate roles and permissions are created in AWS. Take note of the `DRONE_BUILDER_ROLE_ARN` output that was generated during the process:
+To bootstrap the deployment
 
 ```shell
-...
-Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
-DRONE_BUILDER_ROLE_ARN = arn:aws:iam::YOUR_ACCOUNT_NUMBER:role/drone-builder-role
+drone-deploy prepare drone.yourdomain.com
 ```
 
-Copy this and update the `export DRONE_BUILDER_ROLE_ARN=...` line in your `.env` file.
+This sets up the IAM roles and policies to enable us to build and launch the drone-server ami.
 
 #### 4. Build the drone-server ami
 
-Assuming you are using the default aws profile (not aws access keys) build the ami with the `-p` flag as follows. This will use your currently configured default aws profile (or whatever is set in the env var 'AWS_DEFAULT_PROFILE'):
-
 ```shell
-# source the .env file to pickup the DRONE_BUILDER_ROLE_ARN change from the previous step.
-. .env
-./build-drone-server-ami.sh -p
+drone-deploy build-ami drone.yourdomain.com
 ```
 
-This can take a few minutes to complete. When done, check the `packer/manifest.json` file for the following settings:
+This can take a few minutes to complete and it's best to allow it to finish (don't ctl+c unless absolutely needed).
 
-- "drone_deployment_id"
-- "artifact_id"
+#### 5. Deploy
 
-These will contain the unique **'drone_deployment_id'** that is used to tag and authorize resources and the **'artifact_id'**.
+```shell
+drone-deploy deploy drone.yourdomain.com
+```
 
+This step only takes a sec to finish, but it could take a few minutes before the server is up and running.
+
+```shell
+ssh -i ~/.ssh/your_key_pair.pem ubuntu@drone.yourdomain.com
+```
+
+You can also setup a shortcut in `~/.ssh/config`
+
+```shell
+Host "drone.yourdomain.com"
+	HostName "drone.yourdomain.com"
+	User ubuntu
+	IdentityFile ~/.ssh/your-key-pair.pem
+```
