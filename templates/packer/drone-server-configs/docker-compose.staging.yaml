@@ -1,0 +1,5 @@
+version: '3'
+
+services:
+  drone-proxy:
+    command: --conf /etc/Caddyfile --log stdout -ca=https://acme-staging-v02.api.letsencrypt.org/directory -agree

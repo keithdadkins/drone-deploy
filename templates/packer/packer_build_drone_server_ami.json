@@ -1,0 +1,188 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "vpc_id": "",
+      "iam_instance_profile": "{{user `iam_instance_profile`}}",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "token": "{{user `aws_session_token`}}",
+      "ami_description": "{{user `name`}} AMI",
+      "ami_name": "{{user `name`}} {{timestamp}}",
+      "associate_public_ip_address": true,
+      "instance_type": "t2.micro",
+      "name": "{{user `name`}}",
+      "region": "{{user `drone_aws_region`}}",
+      "run_tags": {
+        "ami-create": "{{user `name`}}",
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
+      },
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
+      "ssh_interface": "public_ip",
+      "ssh_timeout": "5m",
+      "ssh_username": "{{user `ssh_username`}}",
+      "subnet_id": "",
+      "tags": {
+        "Drone": "drone-{{user `drone_cli_version`}}",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}",
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/bootstrap_docker.sh",
+      "source": "build-scripts/bootstrap_docker.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/bootstrap_docker_compose.sh",
+      "source": "build-scripts/bootstrap_docker_compose.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/bootstrap_drone.sh",
+      "source": "build-scripts/bootstrap_drone.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/build_aws_cli_image.sh",
+      "source": "build-scripts/build_aws_cli_image.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/requirements.txt",
+      "source": "aws-cli/requirements.txt",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/aws-cli.Dockerfile",
+      "source": "aws-cli/aws-cli.Dockerfile",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/aws-cli-entrypoint-script.sh",
+      "source": "aws-cli/aws-cli-entrypoint-script.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/docker-compose.yaml",
+      "source": "drone-server-configs/docker-compose.yaml",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/drone.service",
+      "source": "drone-server-configs/drone.service",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/drone_reload.service",
+      "source": "drone-server-configs/drone_reload.service",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/Caddyfile",
+      "source": "drone-server-configs/Caddyfile",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/caddy.tar.gz",
+      "source": "drone-server-configs/caddy.tar.gz",
+      "type": "file",
+      "generated": true
+    },
+    {
+      "destination": "/tmp/drone-config",
+      "source": "drone-server-configs/drone-config.sh",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/cleanup.sh",
+      "source": "build-scripts/cleanup.sh",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "DRONE_DOCKER_COMPOSE_VERSION={{user `drone_docker_compose_version`}}",
+        "DRONE_CLI_VERSION={{user `drone_cli_version`}}",
+        "DRONE_SERVER_DOCKER_IMAGE={{user `drone_server_docker_image`}}",
+        "DRONE_AGENT_DOCKER_IMAGE={{user `drone_agent_docker_image`}}",
+        "DRONE_DEPLOYMENT_ID={{user `drone_deployment_uuid`}}",
+        "DRONE_AWS_REGION={{user `drone_aws_region`}}",
+        "DRONE_SERVER_HOST={{user `drone_server_host`}}",
+        "AWS_REGION={{user `drone_aws_region`}}",
+        "AWS_CLI_BASE_IMAGE={{user `aws_cli_base_image`}}",
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}",
+        "AWS_SESSION_TOKEN={{user `aws_session_token`}}"
+      ],
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "inline": [
+        "cd /tmp",
+        "chmod +x bootstrap_docker.sh",
+        "chmod +x bootstrap_docker_compose.sh",
+        "chmod +x bootstrap_drone.sh",
+        "chmod +x build_aws_cli_image.sh",
+        "chmod +x cleanup.sh",
+        "./bootstrap_docker.sh",
+        "./bootstrap_docker_compose.sh",
+        "./bootstrap_drone.sh",
+        "./build_aws_cli_image.sh",
+        "mv docker-compose.yaml /home/ubuntu/docker-compose.yaml.template",
+        "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml.template",
+        "mv Caddyfile /home/ubuntu/",
+        "chown ubuntu:ubuntu /home/ubuntu/Caddyfile",
+        "tar -xvzf caddy.tar.gz -C /home/ubuntu/",
+        "mv drone.service /etc/systemd/system/",
+        "mv drone_reload.service /etc/systemd/system/",
+        "chown root:root /etc/systemd/system/drone.service",
+        "chown root:root /etc/systemd/system/drone_reload.service",
+        "echo 'DRONE_DEPLOYMENT_ID={{user `drone_deployment_uuid`}}' >> /etc/environment",
+        "mv drone-config /usr/local/bin/drone-config",
+        "chmod +x /usr/local/bin/drone-config",
+        "chmod +x /etc/systemd/system/drone*",
+        "systemctl enable drone.service",
+        "wait",
+        "./cleanup.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "drone_deployment_id": "{{user `drone_deployment_uuid`}}",
+        "builder_arn": ""
+      }
+    }
+  ],
+  "variables": {
+    "name": "drone-server-ami",
+    "ssh_username": "ubuntu",
+    "drone_cli_version": "1.0.8",
+    "drone_server_docker_image": "drone/drone:latest",
+    "drone_agent_docker_image": "drone/agent:latest",
+    "drone_aws_region": "",
+    "drone_docker_compose_version": "1.24.0",
+    "drone_server_host": "",
+    "aws_cli_base_image": "python:3.7",
+    "drone_deployment_uuid": "",
+    "iam_instance_profile": "",
+    "aws_region": "",
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "aws_session_token": ""
+  }
+}
