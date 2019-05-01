@@ -1,8 +1,5 @@
 ## drone-deploy
 deployments/
-terraform/
-packer/
-README.bak*
 TODO
 drone-deploy
 cli/drone_deploy/*.bak
@@ -30,10 +27,6 @@ packer_cache/
 
 # ignore manifest.json during dev
 packer/manifest.json
-
-# do not store caddy certs
-packer/drone-server-configs/caddy.tar.gz
-
 
 ### PYTHON
 # Byte-compiled / optimized / DLL files
