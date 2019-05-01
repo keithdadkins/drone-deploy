@@ -1,0 +1,11 @@
+${DRONE_SERVER_HOST}:443 {
+    tls ${DRONE_ADMIN_EMAIL}
+
+    gzip {
+        not /api/
+    }
+    proxy / drone-server:80 {
+        websocket
+        transparent
+    }
+}

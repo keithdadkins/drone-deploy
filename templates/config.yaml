@@ -46,10 +46,6 @@ drone_server_allow_ssh:
 # note: if you do not need ssh access to the drone-server, remove them.
 
 
-# DRONE SERVER SETTINGS
-# Leave tls_autocert set to false since we are using a proxy server
-drone_tls_autocert: false
-
 # When drone_open is set to false, then only the github usernames in the
 # drone_user_filter are allowed to register as users. If set to true, then
 # anyone (the public) can register. The drone_admin is likely your github
@@ -59,6 +55,9 @@ drone_admin: your_github_user_name
 drone_user_filter:
 - github_user_name_1
 - github_user_name_2
+
+# SERVER TLS CERTS
+drone_admin_email: youremailaddy@yourdomain.com
 
 
 # GITHUB OATH SETTINGS
