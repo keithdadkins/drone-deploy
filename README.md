@@ -2,7 +2,7 @@
 
 # Drone
 
-This projects builds, deploys, and maintains a [Drone.io](https://drone.io) CI/CD installation on AWS. Specifically, it..
+This project builds, deploys, and maintains a [Drone.io](https://drone.io) CI/CD installation on AWS. Specifically, it..
 
 * Creates all the necessary IAM Roles, Policies, and Instance Profiles to deploy drone without embedding AWS access keys.
 * Builds a hardened Ubuntu 18.04 Amazon Machine Image (AMI) with docker, docker-compose, and drone ready to go with automatic TLS certs for https://drone.yourdomain.com.
