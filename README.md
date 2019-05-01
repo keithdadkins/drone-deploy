@@ -40,17 +40,18 @@ Once done, view the oath app and take note of the `Client ID` and `Client Secret
 
 #### 2. Clone the repo, create new deployment, and edit config.yaml.
 
-Clone the repo
+Clone the repo and setup the cli for your operating system.
 
 ```shell
 git clone git@github.com:keithdadkins/drone.podchaser.com.git
 cd drone.podchaser.com
+make
 ```
 
 Create a new project
 
 ```shell
-drone-deploy new drone.yourdomain.com
+./drone-deploy new drone.yourdomain.com
 ```
 
 Edit config.yaml
@@ -69,13 +70,13 @@ You will need the following information:
 cp .env.example .env
 vi .env
 source .env
-drone-deploy edit drone.yourdomain.com
+./drone-deploy edit drone.yourdomain.com
 ```
 
 You can view the current state of the deployments config file by:
 
 ```shell
-drone-deploy show drone.yourdomain.com
+./drone-deploy show drone.yourdomain.com
 ```
 
 #### 3. Prepare the deployment (sets up IAM roles and policies).
@@ -85,7 +86,7 @@ drone-deploy show drone.yourdomain.com
 To bootstrap the deployment
 
 ```shell
-drone-deploy prepare drone.yourdomain.com
+./drone-deploy prepare drone.yourdomain.com
 ```
 
 This sets up the IAM roles and policies to enable us to build and launch the drone-server ami.
@@ -93,7 +94,7 @@ This sets up the IAM roles and policies to enable us to build and launch the dro
 #### 4. Build the drone-server ami
 
 ```shell
-drone-deploy build-ami drone.yourdomain.com
+./drone-deploy build-ami drone.yourdomain.com
 ```
 
 This can take a few minutes to complete and it's best to allow it to finish (don't ctl+c unless absolutely needed).
@@ -101,7 +102,7 @@ This can take a few minutes to complete and it's best to allow it to finish (don
 #### 5. Deploy
 
 ```shell
-drone-deploy deploy drone.yourdomain.com
+./drone-deploy deploy drone.yourdomain.com
 ```
 
 This step only takes a sec to finish, but it could take a few minutes before the server is up and running.
