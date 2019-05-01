@@ -95,9 +95,9 @@ check_dir()
 env_path = Path(__file__).parent.joinpath('.env')
 load_dotenv(dotenv_path=env_path)
 
-# pyinstaller statement to make it work with click
-if getattr(sys, 'frozen', False):
-    cli(sys.argv[1:])
+# # pyinstaller statement to make it work with click
+# if getattr(sys, 'frozen', False):
+#     cli(sys.argv[1:])
 
 
 # hookup 'drone-deploy' sub commands

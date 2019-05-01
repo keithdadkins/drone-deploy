@@ -8,7 +8,6 @@ setup(
     url='TODO',
     packages=find_packages(
         exclude=[
-            "drone_deploy.egg_info",
             "tests"
         ]
     ),
