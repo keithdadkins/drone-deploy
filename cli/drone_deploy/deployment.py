@@ -102,6 +102,7 @@ class Deployment():
         self.__load_param("drone_server_allow_ssh")
         self.__load_param("drone_open")
         self.__load_param("drone_admin")
+        self.__load_param("drone_admin_email")
         self.__load_param("drone_user_filter")
         self.__load_param("drone_github_server")
         self.__load_param("drone_github_client_id")

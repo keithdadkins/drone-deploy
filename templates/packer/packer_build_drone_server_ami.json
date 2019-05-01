@@ -97,8 +97,7 @@
     {
       "destination": "/tmp/caddy.tar.gz",
       "source": "drone-server-configs/caddy.tar.gz",
-      "type": "file",
-      "generated": true
+      "type": "file"
     },
     {
       "destination": "/tmp/drone-config",
@@ -139,8 +138,8 @@
         "./build_aws_cli_image.sh",
         "mv docker-compose.yaml /home/ubuntu/docker-compose.yaml.template",
         "chown ubuntu:ubuntu /home/ubuntu/docker-compose.yaml.template",
-        "mv Caddyfile /home/ubuntu/",
-        "chown ubuntu:ubuntu /home/ubuntu/Caddyfile",
+        "mv Caddyfile /home/ubuntu/Caddyfile.template",
+        "chown ubuntu:ubuntu /home/ubuntu/Caddyfile.template",
         "tar -xvzf caddy.tar.gz -C /home/ubuntu/",
         "mv drone.service /etc/systemd/system/",
         "mv drone_reload.service /etc/systemd/system/",
