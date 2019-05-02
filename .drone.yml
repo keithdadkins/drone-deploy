@@ -1,49 +1,38 @@
 kind: pipeline
-name: build-ami
-
-trigger:
-  branch:
-  - master
-  event:
-  - push
+name: default
 
 steps:
-- name: ami-builder
-  image: hashicorp/packer:light
-  environment:
-    DRONE_VERSION: "1.0.8"
-    DRONE_IMAGE=drone/drone: 1
-    DOCKER_COMPOSE_VERSION: "1.24.0"
-    AWS_ACCESS_KEY_ID:
-      from_secret: AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: AWS_SECRET_ACCESS_KEY
-  commands: |
-    cd packer
-    packer build \
-      -var aws_access_key=$AWS_ACCESS_KEY_ID \
-      -var aws_secret_key=$AWS_SECRET_ACCESS_KEY \
-      -var drone_version=$DRONE_VERSION \
-      -var drone_image=$DRONE_IMAGE \
-      -var docker_compose_version=$DOCKER_COMPOSE_VERSION \
-      podchaser_drone_server_ami.json
-    cat manifest.json
+- name: test
+  image: python:3.7
+  commands:
+  - cd cli
+  - pip install --upgrade pip setuptools
+  - pip install -r requirements.txt
+  - pip install -e .
+  - cd ..
+  - make
+  - ./drone-deploy new foobar
+  - pytest cli/tests
 
 ---
-kind: pipeline
-name: deploy-drone
+# kine: pipeline
+# name: linux-cli-build
 
-trigger:
-  branch:
-  - master
-  event:
-  - push
+# platform:
+#   os: linux
+#   arch: amd64
 
-steps:
-- name: drone-deployer
-  image: alpine
-  commands:
-  - echo "deploying"
+# steps:
+# - name: linux-cli-build
+#   image: python:3.7-alpine
+#   commands:
+#   - cd cli
+#   - pip install --upgrade pip setuptools
+#   - pip install -r requirements.txt
+#   - pip install -e .
+#   - pyinstaller drone-deploy.spec --hidden-import=configparser
+#   - 
 
-depends_on:
-- build-ami
+# when:
+#   branch:
+#   - develop
