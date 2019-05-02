@@ -3,7 +3,7 @@ name: default
 
 steps:
 - name: test
-  image: python:3.7-alpine
+  image: python:3.7
   commands:
   - cd cli
   - pip install --upgrade pip setuptools
