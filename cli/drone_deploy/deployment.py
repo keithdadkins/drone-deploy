@@ -1,4 +1,5 @@
 import os
+import secrets
 import ruamel.yaml
 from pathlib import Path
 from ruamel.yaml import YAML
@@ -43,14 +44,22 @@ class Deployment():
 
     def __load_param(self, param_name):
         '''load config from env or from config.yaml if env is not set'''
+        # if param_name == "drone_rpc_secret":
+        #     breakpoint()
         if os.getenv(param_name.upper()):
             # env var exists, set param to its value
-            param = os.getenv(param_name.upper())
+            param = os.getenv(param_name.upper(), '')
         else:
             # get the value from the config file and export as an env var
             param = self.config.get(param_name, '')
             os.environ[param_name.upper()] = str(param)
 
+        # generate a random rpc_secret if not set
+        if param_name == "drone_rpc_secret":
+            if not param and os.environ.get('DRONE_RPC_SECRET') == "None":
+                param = self.generate_rpc()
+
+        # set config entry
         self.config[param_name] = param
 
         # get the 'drone_builder_role_arn' from terraform
@@ -136,6 +145,7 @@ class Deployment():
         self.__load_param("drone_agent_docker_image")
         self.__load_param("drone_server_base_ami")
         self.__load_param("aws_cli_base_image")
+        self.__load_param("drone_rpc_secret")
 
         # machine_name is generated from the host_name, so make sure it's loaded below host_name
         self.__load_param("drone_server_machine_name")
@@ -158,6 +168,10 @@ class Deployment():
     def __str__(self):
         '''returns pretty formatted yaml'''
         return str(ruamel.yaml.round_trip_dump(self.config))
+
+    def generate_rpc(self, num_bytes=16):
+        '''returns a random hexadecimal token (defaults to 128bit) '''
+        return secrets.token_hex(num_bytes)
 
     def write_config(self):
         '''writes the self.config object to disk'''
