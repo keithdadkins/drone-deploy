@@ -1,6 +1,6 @@
 
 resource "aws_s3_bucket" "drone-data" {
-    bucket = "drone-data-${var.drone_deployment_id}"
+    bucket = "${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data"
     acl    = "private"
     policy = <<POLICY
 {
@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "drone-data" {
         "s3:PutObject",
         "s3:PutObjectAcl"
       ],
-      "Resource": "arn:aws:s3:::drone-data-${var.drone_deployment_id}/*",
+      "Resource": "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data*",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": [
@@ -37,7 +37,7 @@ resource "aws_s3_bucket" "drone-data" {
         "s3:PutObject",
         "s3:PutObjectAcl"
       ],
-      "Resource": "arn:aws:s3:::drone-data-${var.drone_deployment_id}/*",
+      "Resource": "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data*",
       "Condition": {
         "StringLike": {
           "s3:x-amz-grant-read": [
@@ -54,7 +54,7 @@ resource "aws_s3_bucket" "drone-data" {
         "AWS": "*"
       },
       "Action": "s3:PutBucketAcl",
-      "Resource": "arn:aws:s3:::drone-data-${var.drone_deployment_id}",
+      "Resource": "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": [
@@ -72,7 +72,7 @@ resource "aws_s3_bucket" "drone-data" {
         "AWS": "*"
       },
       "Action": "s3:PutBucketAcl",
-      "Resource": "arn:aws:s3:::drone-data-${var.drone_deployment_id}",
+      "Resource": "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data",
       "Condition": {
         "StringLike": {
           "s3:x-amz-grant-read": [
@@ -87,7 +87,7 @@ resource "aws_s3_bucket" "drone-data" {
       "Effect": "Deny",
       "Principal": "*",
       "Action": "s3:*",
-      "Resource": "arn:aws:s3:::drone-data-${var.drone_deployment_id}/*",
+      "Resource": "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data*",
       "Condition": {
         "Bool": {
           "aws:SecureTransport": "false"

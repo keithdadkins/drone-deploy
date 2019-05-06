@@ -1,3 +1,7 @@
+variable "drone_deployment_name" {
+    description = "A unique name for the drone deployment."
+}
+
 # vpc
 variable "drone_vpc_id" {
     description = "The vpc id where you want drone to be deployed."
@@ -31,7 +35,6 @@ variable "drone_server_hosted_zone" {
 
 variable "drone_server_machine_name" {
     description = "The name of the drone server host. E.g., 'drone' as in 'drone.podchaser.com'"
-    default = "drone"
 }
 
 variable "is_hosted_zone_private" {

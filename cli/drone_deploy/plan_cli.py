@@ -1,4 +1,3 @@
-import sys
 import click
 from pathlib import Path
 from drone_deploy.deployment import Deployment

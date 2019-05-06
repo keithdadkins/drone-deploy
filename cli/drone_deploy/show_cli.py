@@ -19,5 +19,5 @@ def show(deployment_name):
     deployment = Deployment(deployment_dir)
     click.echo(deployment)
 
-    # TEMP
+    # TODO
     deployment.deployment_status(deployment_name)

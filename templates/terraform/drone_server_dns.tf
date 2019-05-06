@@ -10,6 +10,12 @@ resource "aws_eip" "drone-server" {
     vpc = true
 }
 
+# associate our eip with the drone server instance
+resource "aws_eip_association" "drone-server" {
+    instance_id   = "${aws_instance.drone-server.id}"
+    allocation_id = "${aws_eip.drone-server.id}"
+}
+
 # drone server A record
 resource "aws_route53_record" "drone-server" {
     zone_id = "${data.aws_route53_zone.drone-server.zone_id}"

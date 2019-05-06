@@ -14,16 +14,11 @@ resource "aws_instance" "drone-server" {
     vpc_security_group_ids = ["${aws_security_group.drone-server.id}"]
     key_name = "${var.drone_server_key_pair_name}"
     
-    tags {
-        Name = "drone-server"
-        drone_deployment_id = "${var.drone_deployment_id}"
+    tags = {
+        Name = "${var.drone_deployment_name}-DroneCI"
+        Owner = "${data.aws_caller_identity.current.user_id}"
+        deployment_id = "${var.drone_deployment_id}"
     }
-}
-
-# associate our eip with the drone server instance
-resource "aws_eip_association" "drone-server" {
-    instance_id   = "${aws_instance.drone-server.id}"
-    allocation_id = "${aws_eip.drone-server.id}"
 }
 
 # # output messages

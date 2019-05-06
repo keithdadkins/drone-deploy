@@ -16,8 +16,9 @@ DRONE_BUILDER_AWS_ACCESS_KEY_ID="${DRONE_BUILDER_AWS_ACCESS_KEY_ID:-}"
 DRONE_BUILDER_AWS_SECRET_ACCESS_KEY="${DRONE_BUILDER_AWS_SECRET_ACCESS_KEY:-}"
 
 # drone settings
-DRONE_CLI_VERSION="${DRONE_CLI_VERSION}"
-DRONE_DOCKER_COMPOSE_VERSION="${DRONE_DOCKER_COMPOSE_VERSION}"
+DRONE_DEPLOYMENT_NAME="${DRONE_DEPLOYMENT_NAME:-}"
+DRONE_CLI_VERSION="${DRONE_CLI_VERSION:-}"
+DRONE_DOCKER_COMPOSE_VERSION="${DRONE_DOCKER_COMPOSE_VERSION:-}"
 DRONE_AWS_REGION="${DRONE_AWS_REGION:-}"
 DRONE_SERVER_DOCKER_IMAGE="${DRONE_SERVER_DOCKER_IMAGE:-}"
 DRONE_AGENT_DOCKER_IMAGE="${DRONE_AGENT_DOCKER_IMAGE:-}"
@@ -188,7 +189,7 @@ generate_build_credentials(){
 
     # The user running this script must have permissions to assume the drone-builder role in order to bootstrap packer
     local temp_creds=
-    temp_creds="$($aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name drone-builder)"
+    temp_creds="$($aws sts assume-role --role-arn "$DRONE_BUILDER_ROLE_ARN" --role-session-name $DRONE_DEPLOYMENT_NAME-builder)"
     #     echo "Unable to perform the AssumeRole operation for the current user."
     #     exit 1
     # fi
@@ -279,7 +280,7 @@ build_drone_server_ami(){
         -var drone_server_docker_image="$DRONE_SERVER_DOCKER_IMAGE" \
         -var drone_agent_docker_image="$DRONE_AGENT_DOCKER_IMAGE" \
         -var drone_docker_compose_version="$DRONE_DOCKER_COMPOSE_VERSION" \
-        -var iam_instance_profile="drone-builder" \
+        -var iam_instance_profile="$DRONE_DEPLOYMENT_NAME-builder" \
         packer_build_drone_server_ami.json
 }
 
@@ -318,18 +319,22 @@ build(){
     pull_image "$AWS_CLI_BASE_IMAGE" && echo "OK"
     pull_image "$PACKER_BASE_IMAGE" && echo "OK"
     pull_image "$TERRAFORM_BASE_IMAGE" && echo "OK"
-    build_aws_cli_image
+    # build_aws_cli_image
 
     # assume the builder role and generate temp aws credentials
     generate_build_credentials
 
     # generate a unique deployment id for tagging drone resources
-    printf "Generating unique drone-deployment-id: "
-    if deployment_id="$(generate_uuid)"; then
-        export DRONE_DEPLOYMENT_ID="$deployment_id"
-        echo "$DRONE_DEPLOYMENT_ID"
+    if [ -z "$DRONE_DEPLOYMENT_ID" ]; then
+        printf "Generating unique drone-deployment-id: "
+        if deployment_id="$(generate_uuid)"; then
+            export DRONE_DEPLOYMENT_ID="$deployment_id"
+            echo "$DRONE_DEPLOYMENT_ID"
+        else
+            echo "Error generating drone-deployment-id... exiting."
+        fi
     else
-        echo "Error generating drone-deployment-id... exiting."
+        echo "Using $DRONE_DEPLOYMENT_ID."
     fi
 
     # generate a unique DRONE_RPC_SECRET uuid (if not provided)
@@ -362,21 +367,22 @@ build(){
     echo "Adding configs to parameter store: "
     aws=$(get_aws_command)
     local prefix=
-    prefix="drone.$DRONE_DEPLOYMENT_ID"
+    prefix="/drone/$DRONE_DEPLOYMENT_ID"
 
     # non-secret paramaters
-    put_parameter "$prefix.DRONE_AWS_REGION" "$DRONE_AWS_REGION"
-    put_parameter "$prefix.DRONE_SERVER_HOST" "'$DRONE_SERVER_HOST'"
-    put_parameter "$prefix.DRONE_SERVER_DOCKER_IMAGE" "'$DRONE_SERVER_DOCKER_IMAGE'"
-    put_parameter "$prefix.DRONE_AGENT_DOCKER_IMAGE" "'$DRONE_AGENT_DOCKER_IMAGE'"
+    set -x
+    put_parameter "$prefix/DRONE_AWS_REGION" "$DRONE_AWS_REGION"
+    put_parameter "$prefix/DRONE_SERVER_HOST" "'$DRONE_SERVER_HOST'"
+    put_parameter "$prefix/DRONE_SERVER_DOCKER_IMAGE" "'$DRONE_SERVER_DOCKER_IMAGE'"
+    put_parameter "$prefix/DRONE_AGENT_DOCKER_IMAGE" "'$DRONE_AGENT_DOCKER_IMAGE'"
 
     # secret paramaters
-    put_secret_parameter "$prefix.DRONE_ADMIN" "$DRONE_ADMIN"
-    put_secret_parameter "$prefix.DRONE_ADMIN_EMAIL" "$DRONE_ADMIN_EMAIL"
-    put_secret_parameter "$prefix.DRONE_USER_FILTER" "$DRONE_USER_FILTER"
-    put_secret_parameter "$prefix.DRONE_RPC_SECRET" "$DRONE_RPC_SECRET"
-    put_secret_parameter "$prefix.DRONE_GITHUB_CLIENT_ID" "$DRONE_GITHUB_CLIENT_ID"
-    put_secret_parameter "$prefix.DRONE_GITHUB_CLIENT_SECRET" "$DRONE_GITHUB_CLIENT_SECRET"
+    put_secret_parameter "$prefix/DRONE_ADMIN" "$DRONE_ADMIN"
+    put_secret_parameter "$prefix/DRONE_ADMIN_EMAIL" "$DRONE_ADMIN_EMAIL"
+    put_secret_parameter "$prefix/DRONE_USER_FILTER" "$DRONE_USER_FILTER"
+    put_secret_parameter "$prefix/DRONE_RPC_SECRET" "$DRONE_RPC_SECRET"
+    put_secret_parameter "$prefix/DRONE_GITHUB_CLIENT_ID" "$DRONE_GITHUB_CLIENT_ID"
+    put_secret_parameter "$prefix/DRONE_GITHUB_CLIENT_SECRET" "$DRONE_GITHUB_CLIENT_SECRET"
     echo "Done. The uploaded parameters will be used by the drone server instance during launch."
 }
 

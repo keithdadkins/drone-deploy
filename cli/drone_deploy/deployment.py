@@ -44,38 +44,46 @@ class Deployment():
     def __load_param(self, param_name):
         '''load config from env or from config.yaml if env is not set'''
         if os.getenv(param_name.upper()):
-            # env var exists TODO: test if counts null/unset vars as valid
+            # env var exists, set param to its value
             param = os.getenv(param_name.upper())
         else:
-            # set the param and export as env var
+            # get the value from the config file and export as an env var
             param = self.config.get(param_name, '')
             os.environ[param_name.upper()] = str(param)
 
+        self.config[param_name] = param
+
+        # get the 'drone_builder_role_arn' from terraform
         if param_name == "drone_builder_role_arn":
             self.config[param_name] = self.terraform.drone_builder_role_arn
-        else:
-            self.config[param_name] = param
 
+        # get the 'drone_deployment_id' from packer
         if param_name == "drone_deployment_id" and not param:
             self.config[param_name] = self.packer.drone_deployment_id
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
 
+        # get the drone_server_ami from packer
         if param_name == "drone_server_ami" and not param:
             self.config[param_name] = self.packer.drone_server_ami
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
 
-        # handle yaml arrays to hcl array
+        # set terraform drone_server_machine_name to the same as drone_server_host_name
+        if param_name == "drone_server_machine_name":
+            self.config['drone_server_machine_name'] = self.config.get('drone_server_host_name')
+            os.environ['DRONE_SERVER_MACHINE_NAME'] = os.environ.get('DRONE_SERVER_HOST_NAME')
+
+        # convert yaml arrays to something hashi compatable.
         if type(param) == ruamel.yaml.comments.CommentedSeq:
-            # array
             patched_param = str(param).replace("'", '"')
             self.tf_vars.append((param_name, patched_param))
             param = patched_param
         else:
             self.tf_vars.append((param_name, f"\"{param}\""))
 
-        # export params to for terraform
+        # export configs so they are available in terraform, as terraform automatically
+        # picks up env vars whose names start with TF_VAR_
         os.environ[f"TF_VAR_{param_name.lower()}"] = str(param)
         return param
 
@@ -89,7 +97,19 @@ class Deployment():
         # list of tuples we want to pass along to terraform/packer (added in __load_params)
         self.tf_vars = []
 
-        # load deployment settings from env or config.yaml if env is not set
+        # The 'drone_deployment_name' is dynamically created from the name of the deployment
+        # directory and is used for naming resources in AWS. In order to keep aws resources
+        # clearly labeled, we append 'drone' to the name if the user hasn't already. E.g.,
+        # 'drone-deploy new dev' -> '/deployments/dev' -> 'drone-dev-...' aws resource name
+        if not os.getenv('DRONE_DEPLOYMENT_NAME'):
+            if not self.config.get('drone_deployment_name'):
+                # deployment name wasn't overidden via env var or in the config.yaml file, so
+                # set the env var here and let __load_param handle everything else
+                if 'drone' in self.config_file.parent.name:
+                    os.environ['DRONE_DEPLOYMENT_NAME'] = f"{self.config_file.parent.name}"
+                else:
+                    os.environ['DRONE_DEPLOYMENT_NAME'] = f"drone-{self.config_file.parent.name}"
+        self.__load_param("drone_deployment_name")
         self.__load_param("drone_aws_region")
         self.__load_param("drone_vpc_id")
         self.__load_param("drone_server_host_name")
@@ -114,9 +134,11 @@ class Deployment():
         self.__load_param("drone_cli_version")
         self.__load_param("drone_server_docker_image")
         self.__load_param("drone_agent_docker_image")
-        self.__load_param("aws_cli_base_image")
         self.__load_param("drone_server_base_ami")
-        # self.__load_param("aws_region")
+        self.__load_param("aws_cli_base_image")
+
+        # machine_name is generated from the host_name, so make sure it's loaded below host_name
+        self.__load_param("drone_server_machine_name")
 
         # prepare terraform
         self.setup_terraform()
