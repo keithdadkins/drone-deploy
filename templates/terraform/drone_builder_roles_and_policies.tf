@@ -30,6 +30,7 @@ resource "aws_iam_role" "drone-builder" {
     tags = {
         Name = "${var.drone_deployment_name}-DroneCI"
         Owner = "${data.aws_caller_identity.current.user_id}"
+        deployment_id = "${var.drone_deployment_id}"
     }
 }
 
@@ -129,7 +130,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                     "s3:*"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data*"
+                    "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*"
                 ],
                 "Condition": {
                     "StringLike": {
@@ -145,7 +146,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                 "Effect": "Deny",
                 "Action": "s3:*",
                 "Resource": [
-                    "arn:aws:s3:::${var.drone_server_machine_name}-${var.drone_server_hosted_zone}-drone-data*"
+                    "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*"
                 ],
                 "Condition": {
                     "StringNotLike": {

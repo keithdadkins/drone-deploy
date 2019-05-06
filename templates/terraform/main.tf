@@ -20,18 +20,3 @@ resource "aws_instance" "drone-server" {
         deployment_id = "${var.drone_deployment_id}"
     }
 }
-
-# # output messages
-# output "drone-server-ssh" {
-#     value = <<-CONFIG
-
-#         add to your ~/.ssh/config for quick ssh access (replace with path to your key pair)
-#         once added, connect with 'ssh "${aws_route53_record.drone-server.fqdn}"'
-#         ---
-#         # ~/.ssh/config
-#         Host "${aws_route53_record.drone-server.fqdn}"
-# 	        HostName "${aws_route53_record.drone-server.fqdn}"
-# 	        User ubuntu
-# 	        IdentityFile ~/.ssh/PATH_TO_YOUR_KEY_PAIR.pem
-#     CONFIG
-# }

@@ -73,7 +73,8 @@ drone_github_client_secret:
 # DRONE AGENT SETTINGS
 drone_agents_enabled: true
 drone_server_proto: https
-# the url the agents use to connect to the drone server
+# the url the agents use to connect to the drone server (likely the same
+# as https:// + drone_server_host_name + drone_server_hosted_zone)
 drone_server_host: https://drone.yourdomain.com
 
 
