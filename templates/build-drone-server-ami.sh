@@ -22,15 +22,6 @@ DRONE_DOCKER_COMPOSE_VERSION="${DRONE_DOCKER_COMPOSE_VERSION:-}"
 DRONE_AWS_REGION="${DRONE_AWS_REGION:-}"
 DRONE_SERVER_DOCKER_IMAGE="${DRONE_SERVER_DOCKER_IMAGE:-}"
 DRONE_AGENT_DOCKER_IMAGE="${DRONE_AGENT_DOCKER_IMAGE:-}"
-DRONE_SERVER_HOST="${DRONE_SERVER_HOST:-}"
-DRONE_RPC_SECRET="${DRONE_RPC_SECRET:-}"
-DRONE_VPC_ID="${DRONE_VPC_ID:-}"
-DRONE_ADMIN="${DRONE_ADMIN:-}"
-DRONE_ADMIN_EMAIL="${DRONE_ADMIN_EMAIL:-}"
-DRONE_USER_FILTER="${DRONE_USER_FILTER:-}"
-DRONE_GITHUB_CLIENT_ID="${DRONE_GITHUB_CLIENT_ID:-}"
-DRONE_GITHUB_CLIENT_SECRET="${DRONE_GITHUB_CLIENT_SECRET:-}"
-DRONE_S3_BUCKET="${DRONE_S3_BUCKET:-}"
 
 
 # defaults for docker images
@@ -216,52 +207,6 @@ generate_uuid(){
 }
 
 
-# adds a non-encrypted parameter to aws parameter store
-put_parameter(){
-    local key=      # $1 == key
-    local value=    # $2 == value
-    key="${1:-}"
-    value="${2:-}"
-
-    # return error if no key or value (paramater store requires a non-null, non-blank value)
-    if [ -z "$key" ] || [ -z "$value" ]; then 
-        return 2
-    fi
-
-    # put the parameter
-    printf "    adding '$key'... "
-    if $aws ssm put-parameter --name "$key" --value "$value" --type String --region "$DRONE_AWS_REGION" > /dev/null 2>&1; then
-        echo "OK"
-    else
-        echo "X"
-        return 1
-    fi
-}
-
-
-# adds an encrypted paramater to aws paramater store
-put_secret_parameter(){
-    local key=      # $1 == key
-    local value=    # $2 == value
-    key="${1:-}"
-    value="${2:-}"
-
-    # return error if no key or value (paramater store requires a non-null, non-blank value)
-    if [ -z "$key" ] || [ -z "$value" ]; then 
-        return 2
-    fi
-
-    # put the parameter
-    printf "    adding secret '$key'... "
-    if $aws ssm put-parameter --name "$key" --value "$value" --type SecureString --region "$DRONE_AWS_REGION" > /dev/null 2>&1; then
-        echo "OK"
-    else
-        echo "X"
-        return 1
-    fi
-}
-
-
 # builds the ami
 build_drone_server_ami(){
     echo "Building AMI... "
@@ -337,18 +282,6 @@ build(){
         echo "Using $DRONE_DEPLOYMENT_ID."
     fi
 
-    # generate a unique DRONE_RPC_SECRET uuid (if not provided)
-    if [ -z "$DRONE_RPC_SECRET" ]; then
-        printf "Generating unique drone rpc uuid... "
-        if DRONE_RPC_SECRET="$(generate_uuid)"; then
-            echo "********************************"
-        else
-            echo "Error generating RPC UUID... exiting." && exit 1
-        fi
-    else
-        echo "Using \$DRONE_RPC_SECRET environment variable."
-    fi
-
     # build the server ami and validate
     if build_drone_server_ami; then
         # get the ami id and validate (ensure manifest.json is synced to disk first)
@@ -363,27 +296,6 @@ build(){
         exit 1
     fi
 
-    # add our configs to parameter store
-    echo "Adding configs to parameter store: "
-    aws=$(get_aws_command)
-    local prefix=
-    prefix="/drone/$DRONE_DEPLOYMENT_ID"
-
-    # non-secret paramaters
-    set -x
-    put_parameter "$prefix/DRONE_AWS_REGION" "$DRONE_AWS_REGION"
-    put_parameter "$prefix/DRONE_SERVER_HOST" "'$DRONE_SERVER_HOST'"
-    put_parameter "$prefix/DRONE_SERVER_DOCKER_IMAGE" "'$DRONE_SERVER_DOCKER_IMAGE'"
-    put_parameter "$prefix/DRONE_AGENT_DOCKER_IMAGE" "'$DRONE_AGENT_DOCKER_IMAGE'"
-
-    # secret paramaters
-    put_secret_parameter "$prefix/DRONE_ADMIN" "$DRONE_ADMIN"
-    put_secret_parameter "$prefix/DRONE_ADMIN_EMAIL" "$DRONE_ADMIN_EMAIL"
-    put_secret_parameter "$prefix/DRONE_USER_FILTER" "$DRONE_USER_FILTER"
-    put_secret_parameter "$prefix/DRONE_RPC_SECRET" "$DRONE_RPC_SECRET"
-    put_secret_parameter "$prefix/DRONE_GITHUB_CLIENT_ID" "$DRONE_GITHUB_CLIENT_ID"
-    put_secret_parameter "$prefix/DRONE_GITHUB_CLIENT_SECRET" "$DRONE_GITHUB_CLIENT_SECRET"
-    echo "Done. The uploaded parameters will be used by the drone server instance during launch."
 }
 
 ##### script entrypoint below #####

@@ -2,33 +2,70 @@ variable "drone_deployment_name" {
     description = "A unique name for the drone deployment."
 }
 
-# vpc
+variable "drone_deployment_id" {
+    description = "drone_deployment_id artifact generated during the bootstrap process. Used for tagging resources."
+}
+
 variable "drone_vpc_id" {
-    description = "The vpc id where you want drone to be deployed."
+    description = "The vpc_id to deploy in."
 }
 
-# region
 variable "drone_aws_region" {
-    description = "AWS region we are deploying drone into."
+    description = "The aws region to deploy in."
 }
 
-# drone-server ami
+variable "drone_server_host" {
+    description = "The full URL that agents will use to connect to the server. ex https://drone.yourdomain.com"
+}
+
+variable "drone_server_docker_image" {
+    description = "The server docker image. Get this from https://hub.docker.com/r/drone/drone/tags"
+    default = "drone/drone:latest"
+}
+
+variable "drone_agent_docker_image" {
+    description = "The agent docker image. Get this from https://hub.docker.com/r/drone/agent/tags"
+    default = "drone/agent:latest"
+}
+
+variable "drone_github_server" {
+    description = "The full URL to the GitHub Server."
+    default = "https://github.com"
+}
+
+variable "drone_admin" {
+    description = "The GitHub username of the deployments administrator."
+}
+
+variable "drone_admin_email" {
+    description = "Email address for the admin. This is needed for auto TLS registration with Let's Encrypt"
+}
+
+variable "drone_user_filter" {
+    description = "List of GitHub usernames to allow access to Drone CI"
+}
+
+variable "drone_rpc_secret" {
+    description = "A shared secret used to authenticate communication between agents and the server."
+}
+
+variable "drone_github_client_id" {
+    description = "OAuth client id. Create and get from https://github.com/settings/developers."
+}
+
+variable "drone_github_client_secret" {
+    description = "OAuth client secret. Create and get from https://github.com/settings/developers."
+}
+
 variable "drone_server_ami" {
     description = "The drone-server AMI used to launch the drone server ec2 instance."
 }
 
-# drone-server instance-type (t2.micro, etc.)
 variable "drone_server_instance_type" {
     description = "Instance type for the drone server. Defaults to t2.micro"
     default = "t2.micro"
 }
 
-# deployment uuid
-variable "drone_deployment_id" {
-    description = "drone_deployment_id artifact generated during the bootstrap process. Used for tagging resources."
-}
-
-# domain, dns
 variable "drone_server_hosted_zone" {
     description = "The name of the hosted zone for the drone server domain. E.g., 'podchaser.com', not 'drone.podchaser.com')"
 }
@@ -42,7 +79,6 @@ variable "is_hosted_zone_private" {
     default = false
 }
 
-# security group rules
 variable "drone_server_allow_ssh" {
     type = "list"
     description = "Array of ip addresses allowed to access ssh/port 22."
@@ -60,7 +96,6 @@ variable "drone_server_allow_https" {
     default = ["0.0.0.0/0"]
 }
 
-# ec2 instance key-pair
 variable "drone_server_key_pair_name" {
     description = "Name of the Key Pair to use to connect to the ec2 instance. You must create and download the keys manually."
 }
