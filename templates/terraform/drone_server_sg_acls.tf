@@ -1,6 +1,6 @@
 resource "aws_security_group" "drone-server" {
-    name        = "drone-server"
-    description = "drone-server-sg-access-rules"
+    name        = "${var.drone_deployment_name}-server"
+    description = "${var.drone_deployment_name}-server-sg-access-rules"
     vpc_id      = "${var.drone_vpc_id}"
 
     ingress {
@@ -29,6 +29,12 @@ resource "aws_security_group" "drone-server" {
         to_port         = 0
         protocol        = "-1"
         cidr_blocks     = ["0.0.0.0/0"]
+    }
+
+    tags = {
+        Name = "${var.drone_deployment_name}-DroneCI"
+        Owner = "${data.aws_caller_identity.current.user_id}"
+        deployment_id = "${var.drone_deployment_id}"
     }
 
 }

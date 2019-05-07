@@ -13,7 +13,7 @@ compose_file="/home/ubuntu/docker-compose.yaml"
 caddy_file="/home/ubuntu/Caddyfile"
 
 # parameters (normal config parameters and secret config parameters)
-configs=('DRONE_AWS_REGION' 'DRONE_SERVER_HOST' 'DRONE_SERVER_DOCKER_IMAGE' 'DRONE_AGENT_DOCKER_IMAGE')
+configs=('DRONE_AWS_REGION' 'DRONE_SERVER_HOST' 'DRONE_SERVER_DOCKER_IMAGE' 'DRONE_AGENT_DOCKER_IMAGE' 'DRONE_S3_BUCKET')
 secrets=('DRONE_ADMIN' 'DRONE_ADMIN_EMAIL' 'DRONE_USER_FILTER' 'DRONE_RPC_SECRET' 'DRONE_GITHUB_CLIENT_ID' 'DRONE_GITHUB_CLIENT_SECRET')
 
 # wait for meta-data service (MS_WAIT_TIME is in seconds)
@@ -49,7 +49,7 @@ set_region(){
 get_parameter(){
     local param=
     local val=
-    if param=$($aws ssm get-parameter --region $region --name "drone.$DRONE_DEPLOYMENT_ID.$1"); then
+    if param=$($aws ssm get-parameter --region $region --name "/drone/$DRONE_DEPLOYMENT_ID/$1"); then
 	val="$(docker run --rm aws-cli /bin/sh -c "echo '$param' | jq .Parameter.Value | xargs")"
         echo "$val"
     else
@@ -62,7 +62,7 @@ get_parameter(){
 get_secret_parameter(){
     local param=
     local val=
-    if param=$($aws ssm get-parameter --with-decryption --region $region --name "drone.$DRONE_DEPLOYMENT_ID.$1"); then
+    if param=$($aws ssm get-parameter --with-decryption --region $region --name "/drone/$DRONE_DEPLOYMENT_ID/$1"); then
 	val="$(docker run --rm aws-cli /bin/sh -c "echo '$param' | jq .Parameter.Value | xargs")"
         echo "$val"
     else
@@ -82,8 +82,8 @@ update_files() {
 
 
 main(){
-    # set region and key prefix
-    prefix="drone.$DRONE_DEPLOYMENT_ID"
+    # # set region and key prefix
+    # prefix="/drone/$DRONE_DEPLOYMENT_ID"
     set_region > /dev/null 2>&1
 
     # fetch and update non-secret configs in the compose file

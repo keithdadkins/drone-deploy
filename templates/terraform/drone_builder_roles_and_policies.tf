@@ -1,10 +1,9 @@
-# Attach the ec2 and s3 policies to the drone-builder role and allow the ec2
-# instance to assume that role. This allows the ec2 instance to interact 
-# with ec2 and s3 without needing to supply aws credentials (e.g., AWS_ACCESS_KEY's)
+# TODO create a separate set of roles and policies for the drone-server instance
+# For now, just share with the drone-builder role (it's safe to do so)
 
-# drone-builder role (with assume role permissions)
+# drone-builder role with policy that defines who can assume this role
 resource "aws_iam_role" "drone-builder" {
-    name               = "drone-builder-role"
+    name               = "${var.drone_deployment_name}-builder"
     path               = "/"
     assume_role_policy = <<-POLICY
     {
@@ -27,12 +26,18 @@ resource "aws_iam_role" "drone-builder" {
         ]
     }
     POLICY
+       
+    tags = {
+        Name = "${var.drone_deployment_name}-DroneCI"
+        Owner = "${data.aws_caller_identity.current.user_id}"
+        deployment_id = "${var.drone_deployment_id}"
+    }
 }
 
-# this is the ec2 policy for the drone-builder role. The minimum perms for packer to do its thing.
-# it also allows the ec2 instance to assume the ec2 and s3 p
+# ec2 policy that contains the minimum set of perms for packer to build the ami,
+# get secrets from the paramter store, and to pass roles to the ec2 instance
 resource "aws_iam_policy" "drone-builder-ec2" {
-    name        = "drone-builder-ec2-policy"
+    name        = "${var.drone_deployment_name}-ec2"
     path        = "/"
     description = ""
     policy      = <<-POLICY
@@ -100,7 +105,7 @@ resource "aws_iam_policy" "drone-builder-ec2" {
                     "ssm:GetParametersByPath"
                 ],
                 "Resource":[
-                    "arn:aws:ssm:${var.drone_aws_region}:${data.aws_caller_identity.current.account_id}:parameter/drone*"
+                    "arn:aws:ssm:${var.drone_aws_region}:${data.aws_caller_identity.current.account_id}:parameter/drone/${var.drone_deployment_id}/*"
                 ]
             }
         ]
@@ -108,10 +113,10 @@ resource "aws_iam_policy" "drone-builder-ec2" {
     POLICY
 }
 
-# this policy restricts access to 'drone-data-*' buckets to anyone but 
-# the ec2 instance's assumed drone-builder-role.
+# this policy enables the builder to create and manage a deployments s3 bucket, and blocks
+# everyone else (notice the "StringLike" and "StringNotLike" in the conditions
 resource "aws_iam_policy" "drone-builder-s3" {
-    name        = "drone-builder-s3-policy"
+    name        = "${var.drone_deployment_name}-s3"
     path        = "/"
     description = "GrantBuilderRoleDenyEveryoneElse"
     policy      = <<-POLICY
@@ -125,7 +130,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                     "s3:*"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::drone-data-*"
+                    "arn:aws:s3:::${var.drone_s3_bucket}/*"
                 ],
                 "Condition": {
                     "StringLike": {
@@ -141,7 +146,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                 "Effect": "Deny",
                 "Action": "s3:*",
                 "Resource": [
-                    "arn:aws:s3:::drone-data-*"
+                    "arn:aws:s3:::${var.drone_s3_bucket}/*"
                 ],
                 "Condition": {
                     "StringNotLike": {
@@ -157,26 +162,27 @@ resource "aws_iam_policy" "drone-builder-s3" {
     POLICY
 }
 
-# attache ec2 and s3 policies to the drone-builder-role
+# attach the ec2 and s3 policies to the drone-builder-role
 resource "aws_iam_policy_attachment" "ec2" {
-    name       = "drone-builder-ec2-policy-attachment"
+    name       = "${var.drone_deployment_name}-ec2-attach"
     policy_arn = "${aws_iam_policy.drone-builder-ec2.arn}"
     groups     = []
     users      = []
-    roles      = ["drone-builder-role"]
+    roles      = ["${var.drone_deployment_name}-builder"]
 }
 
 resource "aws_iam_policy_attachment" "s3" {
-    name       = "drone-builder-s3-policy-attachment"
+    name       = "${var.drone_deployment_name}-s3-attach"
     policy_arn = "${aws_iam_policy.drone-builder-s3.arn}"
     groups     = []
     users      = []
-    roles      = ["drone-builder-role"]
+    roles      = ["${var.drone_deployment_name}-builder"]
 }
 
-# the profile to launch our ec2 instance with
+# instance profile used to pass roles to our EC2 instance when it starts.
+# https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 resource "aws_iam_instance_profile" "drone-builder" {
-  name  = "drone-builder"
+  name  = "${var.drone_deployment_name}-builder"
   role = "${aws_iam_role.drone-builder.name}"
 }
 

@@ -12,7 +12,7 @@ steps:
   - cd ..
   - make
   - ./drone-deploy new foobar
-  - pytest cli/tests
+  - pytest --cov-config=.coveragerc --cov=cli -vv cli/tests/
 
 ---
 # kine: pipeline
