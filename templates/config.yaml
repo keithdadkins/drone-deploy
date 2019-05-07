@@ -48,15 +48,15 @@ drone_server_allow_ssh:
 
 # When drone_open is set to false, then only the github usernames in the
 # drone_user_filter are allowed to register as users. If set to true, then
-# anyone (the public) can register. The drone_admin is likely your github
-# username.
+# anyone (the public) can register.
 drone_open: false
-drone_admin: your_github_user_name
 drone_user_filter:
-- github_user_name_1
+- your_github_user_name
 - github_user_name_2
 
-# SERVER TLS CERTS - email is neccesary for automatic Let's Encrypt TLS certs.
+# drone admin (must be in the user_filter above). An email is neccesary for
+# automatic Let's Encrypt TLS certs.
+drone_admin: your_github_user_name
 drone_admin_email: youremailaddy@yourdomain.com
 
 

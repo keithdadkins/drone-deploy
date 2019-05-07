@@ -114,28 +114,5 @@ class Terraform():
         '''Runs 'terraform destroy' in the working directory.'''
         self.terraform("destroy", tf_targets)
 
-    # def bootstrap_roles_and_policies(self):
-    #     '''Applies needed IAM roles and policies for building/deploying ami.'''
-    #     targets = ' '.join("-target={}".format(t) for t in [
-    #         "aws_iam_policy.drone-builder-ec2",
-    #         "aws_iam_policy.drone-builder-s3",
-    #         "aws_iam_policy_attachment.ec2",
-    #         "aws_iam_policy_attachment.s3",
-    #         "aws_iam_instance_profile.drone-builder"
-    #     ])
-    #     self.terraform("apply", targets)
-
     def status(self):
         pass
-
-    # def load_outputs(self):
-    #     '''loads terraform outputs from tfstat in json format'''
-    #     # try to load terraform.tfstate file
-    #     try:
-    #         drone_builder_role_arn = self.tf_state["modules"][0]["outputs"]
-    #         self.drone_builder_role_arn = dbra["DRONE_BUILDER_ROLE_ARN"]["value"]
-    #         os.environ['DRONE_BUILDER_ROLE_ARN'] = self.drone_builder_role_arn
-    #         print(f"drone_builder_role_arn is set to {self.drone_builder_role_arn}")
-    #     except Exception:
-    #         self.drone_builder_role_arn = ""
-    #         self.tf_state = {}
