@@ -32,7 +32,7 @@ install: requirements build
 
 requirements:
 	cd cli && \
-	source venv/bin/activate && \
+	. venv/bin/activate && \
 	pip install -r requirements.txt	
 
 build:
