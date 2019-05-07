@@ -5,7 +5,8 @@ locals {
         DRONE_SERVER_HOST = "${var.drone_server_host}",
         DRONE_SERVER_DOCKER_IMAGE = "${var.drone_server_docker_image}",
         DRONE_AGENT_DOCKER_IMAGE = "${var.drone_agent_docker_image}",
-        DRONE_GITHUB_SERVER = "${var.drone_github_server}"
+        DRONE_GITHUB_SERVER = "${var.drone_github_server}",
+        DRONE_S3_BUCKET = "${var.drone_s3_bucket}"
     },
     secret_params = {
         DRONE_ADMIN = "${var.drone_admin}",

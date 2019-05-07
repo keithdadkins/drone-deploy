@@ -56,8 +56,16 @@ class Deployment():
 
         # generate a random rpc_secret if not set
         if param_name == "drone_rpc_secret":
-            if not param and os.environ.get('DRONE_RPC_SECRET') == "None":
+            if not param and os.environ.get('DRONE_RPC_SECRET') in ("None", ""):
                 param = self.generate_rpc()
+
+        # dynamically name the s3 bucket
+        if param_name == "drone_s3_bucket":
+            if not param and os.environ.get('DRONE_S3_BUCKET') in ("None", ""):
+                machine_name = os.environ.get('DRONE_SERVER_MACHINE_NAME')
+                hosted_zone = os.environ.get('DRONE_SERVER_HOSTED_ZONE')
+                if machine_name and hosted_zone:
+                    param = f"drone-data.{machine_name}.{hosted_zone}"
 
         # set config entry
         self.config[param_name] = param
@@ -77,11 +85,6 @@ class Deployment():
             self.config[param_name] = self.packer.drone_server_ami
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
-
-        # set terraform drone_server_machine_name to the same as drone_server_host_name
-        if param_name == "drone_server_machine_name":
-            self.config['drone_server_machine_name'] = self.config.get('drone_server_host_name')
-            os.environ['DRONE_SERVER_MACHINE_NAME'] = os.environ.get('DRONE_SERVER_HOST_NAME')
 
         # convert yaml arrays to something hashi compatable.
         if type(param) == ruamel.yaml.comments.CommentedSeq:
@@ -121,7 +124,7 @@ class Deployment():
         self.__load_param("drone_deployment_name")
         self.__load_param("drone_aws_region")
         self.__load_param("drone_vpc_id")
-        self.__load_param("drone_server_host_name")
+        self.__load_param("drone_server_machine_name")
         self.__load_param("drone_server_hosted_zone")
         self.__load_param("drone_server_key_pair_name")
         self.__load_param("drone_server_instance_type")
@@ -146,14 +149,12 @@ class Deployment():
         self.__load_param("drone_server_base_ami")
         self.__load_param("aws_cli_base_image")
         self.__load_param("drone_rpc_secret")
-
-        # machine_name is generated from the host_name, so make sure it's loaded below host_name
-        self.__load_param("drone_server_machine_name")
+        self.__load_param("drone_s3_bucket")
 
         # prepare terraform
         self.setup_terraform()
         self.__load_param("drone_builder_role_arn")
-        
+
         # prepare packer
         self.setup_packer()
         self.__load_param("drone_deployment_id")

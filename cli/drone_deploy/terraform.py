@@ -48,7 +48,6 @@ class Terraform():
 
             # pass our env vars along to the sub process
             env = os.environ
-            # print(env)
             p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                                  cwd=self.working_dir, env=env)
             while True:

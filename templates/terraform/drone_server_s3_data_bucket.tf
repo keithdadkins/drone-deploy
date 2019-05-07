@@ -1,6 +1,6 @@
 
 resource "aws_s3_bucket" "drone-data" {
-    bucket = "drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}"
+    bucket = "${var.drone_s3_bucket}"
     acl    = "private"
     policy = <<POLICY
 {
@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "drone-data" {
         "s3:PutObject",
         "s3:PutObjectAcl"
       ],
-      "Resource": "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*",
+      "Resource": "arn:aws:s3:::${var.drone_s3_bucket}/*",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": [
@@ -37,7 +37,7 @@ resource "aws_s3_bucket" "drone-data" {
         "s3:PutObject",
         "s3:PutObjectAcl"
       ],
-      "Resource": "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*",
+      "Resource": "arn:aws:s3:::${var.drone_s3_bucket}/*",
       "Condition": {
         "StringLike": {
           "s3:x-amz-grant-read": [
@@ -54,7 +54,7 @@ resource "aws_s3_bucket" "drone-data" {
         "AWS": "*"
       },
       "Action": "s3:PutBucketAcl",
-      "Resource": "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}",
+      "Resource": "arn:aws:s3:::${var.drone_s3_bucket}",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": [
@@ -72,7 +72,7 @@ resource "aws_s3_bucket" "drone-data" {
         "AWS": "*"
       },
       "Action": "s3:PutBucketAcl",
-      "Resource": "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}",
+      "Resource": "arn:aws:s3:::${var.drone_s3_bucket}",
       "Condition": {
         "StringLike": {
           "s3:x-amz-grant-read": [
@@ -87,7 +87,7 @@ resource "aws_s3_bucket" "drone-data" {
       "Effect": "Deny",
       "Principal": "*",
       "Action": "s3:*",
-      "Resource": "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*",
+      "Resource": "arn:aws:s3:::${var.drone_s3_bucket}/*",
       "Condition": {
         "Bool": {
           "aws:SecureTransport": "false"

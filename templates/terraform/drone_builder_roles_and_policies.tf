@@ -130,7 +130,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                     "s3:*"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*"
+                    "arn:aws:s3:::${var.drone_s3_bucket}/*"
                 ],
                 "Condition": {
                     "StringLike": {
@@ -146,7 +146,7 @@ resource "aws_iam_policy" "drone-builder-s3" {
                 "Effect": "Deny",
                 "Action": "s3:*",
                 "Resource": [
-                    "arn:aws:s3:::drone-data.${var.drone_server_machine_name}.${var.drone_server_hosted_zone}*"
+                    "arn:aws:s3:::${var.drone_s3_bucket}/*"
                 ],
                 "Condition": {
                     "StringNotLike": {

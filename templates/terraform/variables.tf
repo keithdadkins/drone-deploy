@@ -99,3 +99,7 @@ variable "drone_server_allow_https" {
 variable "drone_server_key_pair_name" {
     description = "Name of the Key Pair to use to connect to the ec2 instance. You must create and download the keys manually."
 }
+
+variable "drone_s3_bucket" {
+    description = "Name of the s3 bucket to store build logs and drone backups."
+}
