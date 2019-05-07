@@ -67,11 +67,11 @@ variable "drone_server_instance_type" {
 }
 
 variable "drone_server_hosted_zone" {
-    description = "The name of the hosted zone for the drone server domain. E.g., 'podchaser.com', not 'drone.podchaser.com')"
+    description = "The name of the hosted zone for the drone server domain. E.g., 'yourdomain.com', not 'drone.yourdomain.com')"
 }
 
 variable "drone_server_machine_name" {
-    description = "The name of the drone server host. E.g., 'drone' as in 'drone.podchaser.com'"
+    description = "The name of the drone server host. E.g., 'drone' as in 'drone.yourdomain.com'"
 }
 
 variable "is_hosted_zone_private" {

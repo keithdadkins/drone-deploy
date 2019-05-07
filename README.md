@@ -1,4 +1,4 @@
-[![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone.podchaser.com/status.svg?ref=refs/heads/master)](https://drone.keithdadkins.me/keithdadkins/drone.podchaser.com)
+[![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone-deploy/status.svg?ref=refs/heads/master)](https://drone.keithdadkins.me/keithdadkins/drone-deploy)
 
 # Drone
 
