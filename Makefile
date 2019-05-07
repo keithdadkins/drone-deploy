@@ -3,15 +3,6 @@
 PROJ_SLUG = drone_deploy
 CLI_NAME = drone-deploy
 PY_VERSION = 3.7
-GREEN = 2
-RED = 1
-
-define colorecho
-        @tput bold
-        @tput setaf $1
-        @echo $2
-        @tput sgr0
-endef
 
 # TODO
 # OSFLAG 				:=
@@ -49,19 +40,17 @@ build:
 	pip install --editable .
 
 virtualenv:
-	pip install virtualenv
+	@pip install virtualenv
 
 venv:
 	cd cli && \
 	virtualenv --python python$(PY_VERSION) venv
 	@echo
 	@echo To activate the environment, use the following command:
+	@echo "source cli/venv/bin/activate"
 	@echo
-	$(call colorecho, $(GREEN), "source cli/venv/bin/activate")
+	@echo Once activated, run 'make' to install dependencies and build the cli.
 	@echo
-	@echo Once activated, you can use the 'install' target to install dependencies:
-	@echo
-	$(call colorecho, $(GREEN), "source cli/venv/bin/activate")
 
 freeze:
 	cd cli && \
