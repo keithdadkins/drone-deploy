@@ -5,14 +5,14 @@ steps:
 - name: test
   image: python:3.7
   commands:
-  - cd cli
   - pip install --upgrade pip setuptools
-  - pip install -r requirements.txt
-  - pip install -e .
-  - cd ..
+  - make virtualenv
+  - make venv
+  - source cli/venv/bin/activate
   - make
-  - ./drone-deploy new foobar
-  - pytest --cov-config=.coveragerc --cov=cli -vv cli/tests/
+  - make testdeployment
+  - make smoketest
+  - make coverage
 
 ---
 # kine: pipeline
