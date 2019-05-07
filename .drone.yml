@@ -8,7 +8,7 @@ steps:
   - pip install --upgrade pip setuptools
   - make virtualenv
   - make venv
-  - source cli/venv/bin/activate
+  - . cli/venv/bin/activate
   - make
   - make testdeployment
   - make smoketest
