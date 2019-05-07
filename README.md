@@ -2,13 +2,20 @@
 
 # Drone
 
-This project builds, deploys, and maintains a [Drone.io](https://drone.io) CI/CD installation on AWS. Specifically, it..
+This project builds, deploys, and maintains a [Drone.io](https://drone.io) CI/CD installation on AWS using the `drone-deploy` command line application. Specifically, it:
 
-* Creates all the necessary IAM Roles, Policies, and Instance Profiles to deploy drone without embedding AWS access keys.
-* Builds a hardened Ubuntu 18.04 Amazon Machine Image (AMI) with docker, docker-compose, and drone ready to go with automatic TLS certs for https://drone.yourdomain.com.
-* Creates a locked-down S3 bucket for storing build logs, tls certs, and database backups. Only the admin and the drone server can access this bucket.
-* Creates an Elastic IP (eip) and Route53 domain for drone. Automatically updated during upgrades (not implemented yet).
-* Sets up security group rules for http, https, and ssh access from the ip addresses you specify.
+* Creates all the necessary IAM Roles and Policies needed to deploy drone without embedding AWS credentials.
+* Builds a reasonably hardened Ubuntu 18.04 Amazon Machine Image (using the latest official Ubuntu AMI) with docker, docker-compose, and drone installed and ready to go with automatic TLS certs setup for https://drone.yourdomain.com.
+* Creates a locked-down S3 bucket for storing build logs and backups.
+* Creates DNS entries and associated Elastic IP (eip) for the drone server.
+* Sets up security group rules to allow http, https, and ssh access from the ip addresses you specify.
+
+## Requirements
+
+* (Docker)[https://www.docker.com/products/docker-desktop]
+* (Python 3)[https://realpython.com/installing-python/]
+* (Terraform)[https://learn.hashicorp.com/terraform/getting-started/install]
+
 
 ## Quickstart (semi-manual until app is completed)
 
@@ -17,7 +24,7 @@ Ultimately, we will use drone to deploy and manage updates to itself, but we nee
 ### Bootstrap steps
 
 1. Create a new [OAuth application for drone in githhub](https://github.com/settings/developers) in your github account settings.
-2. Clone the repo, create a new deployment, and edit the config.yaml.
+2. Clone the repo, setup the cli, create a new deployment, and edit the config.yaml.
 3. Prepare the deployment (sets up IAM roles and policies).
 4. Build the drone server AMI.
 5. Deploy drone.
@@ -43,9 +50,10 @@ Once done, view the oath app and take note of the `Client ID` and `Client Secret
 Clone the repo and setup the cli for your operating system.
 
 ```shell
-git clone git@github.com:keithdadkins/drone.podchaser.com.git
-cd drone.podchaser.com
-make
+git clone git@github.com:keithdadkins/drone-deploy.git
+cd drone-deploy
+make venv # setups up a virtualenv in the cli directory
+make # installs requirements and sets up the cli in the path
 ```
 
 Create a new project
