@@ -86,6 +86,12 @@ class Deployment():
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
 
+        # flatten user-filter for docker-compose (convert from ruamel and remove brackets), ticks, and spaces
+        if param_name == "drone_user_filter":
+            patched_param = []
+            patched_param = list(param)
+            param = repr(patched_param).replace('[', '').replace(']', '').replace("'", "").replace(" ", "")
+
         # convert yaml arrays to something hashi compatable.
         if type(param) == ruamel.yaml.comments.CommentedSeq:
             patched_param = str(param).replace("'", '"')
@@ -202,15 +208,6 @@ class Deployment():
         # build the ami
         self.packer.build_ami()
 
-        # # set build artifacts (overides existing env vars)
-        # try:
-        #     self.drone_deployment_id = self.packer.drone_deployment_id
-        #     self.drone_server_ami = self.packer.ami_id
-        #     os.environ['DRONE_DEPLOYMENT_ID'] = self.drone_deployment_id
-        #     os.environ['DRONE_SERVER_AMI'] = self.drone_server_ami
-        # except AttributeError:
-        #     print("Could not load deployment. Check your settings and try rebuilding the ami.")
-
     def deploy(self, targets=[]):
         '''apply terraform resources'''
         self.terraform.apply(targets)
@@ -221,15 +218,6 @@ class Deployment():
 
     def deployment_status(self, deployment_name):
         '''returns the state of the deployment'''   
-
-        # if self.terraform.has_tf_state:
-        #     items = self.terraform.tf_state['modules'][0]['resources']
-        # else:
-        #     items = {}
-
-        # print("The following resources have been deployed:")
-        # for k, v in items.items():
-        #     print(f"    {k}")
 
         # packer
         if self.packer.new_build:
