@@ -12,7 +12,6 @@ steps:
   - make
   - make testdeployment
   - make smoketest
-  - make coverage
 
 ---
 # kine: pipeline
