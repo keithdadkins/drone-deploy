@@ -18,9 +18,9 @@ else
 	endif
 endif
 
-OSX: install pyinstall
+OSX: pyinstall
 	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-osx
-LINUX: install pyinstall
+LINUX: pyinstall
 	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-linux
 WINDOWS:
 	@echo Building x86_64 'drone-deploy' on Windows
@@ -31,6 +31,7 @@ install: requirements build
 
 pyinstall:
 	cd cli && \
+	. venv/bin/activate && \
 	pyinstaller drone-deploy.spec --hidden-import=configparser
 
 requirements:
