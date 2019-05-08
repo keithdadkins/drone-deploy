@@ -34,6 +34,9 @@ steps:
     event: tag
 
 trigger:
+  branch:
+  - master
+  - develop
   event:
   - push
   - tag
