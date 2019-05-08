@@ -31,7 +31,6 @@ install: requirements build
 
 pyinstall:
 	cd cli && \
-	. venv/bin/activate && \
 	pyinstaller drone-deploy.spec --hidden-import=configparser
 
 requirements:
