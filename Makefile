@@ -4,31 +4,34 @@ PROJ_SLUG = drone_deploy
 CLI_NAME = drone-deploy
 PY_VERSION = 3.7
 
-# TODO
-# OSFLAG 				:=
-# ifeq ($(OS),Windows_NT)
-# 	OSFLAG += WINDOWS
-# else
-# 	UNAME_S := $(shell uname -s)
-# 	ifeq ($(UNAME_S),Linux)
-# 		OSFLAG += LINUX
-# 	endif
-# 	ifeq ($(UNAME_S),Darwin)
-# 		OSFLAG += OSX
-# 	endif
-# endif
 
-# OSX:
-# 	@echo "Setting up './drone-deploy' for osx."
-# 	@ln -sf cli/dist/drone-deploy.osx drone-deploy
-# LINUX:
-# 	@echo "Setting up './drone-deploy' for linux."
-# 	@ln -sf cli/dist/drone-deploy.linux drone-deploy
-# WINDOWS:
-# 	@echo "TODO"
+OSFLAG 				:=
+ifeq ($(OS),Windows_NT)
+	OSFLAG += WINDOWS
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		OSFLAG += LINUX
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		OSFLAG += OSX
+	endif
+endif
 
-# setup_cli: $(OSFLAG)
+OSX: install pyinstall
+	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-osx
+LINUX: install pyinstall
+	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-linux
+WINDOWS:
+	@echo Building x86_64 'drone-deploy' on Windows
+
+release: $(OSFLAG)
+
 install: requirements build
+
+pyinstall:
+	cd cli && \
+	pyinstaller drone-deploy.spec --hidden-import=configparser
 
 requirements:
 	cd cli && \
