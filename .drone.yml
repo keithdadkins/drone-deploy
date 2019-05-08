@@ -14,6 +14,20 @@ steps:
   - make smoketest
 
 ---
+
+kind: pipeline
+name: default
+
+steps:
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: repo_api_key
+    files: cli/dist/*
+  when:
+    event: tag
+
 # kine: pipeline
 # name: linux-cli-build
 
