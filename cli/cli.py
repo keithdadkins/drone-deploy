@@ -4,6 +4,7 @@ import click
 import boto3
 import boto3.session
 import botocore.exceptions
+from version import __version__
 from pathlib import Path
 from dotenv import load_dotenv
 from drone_deploy import new_deployment, prepare_deployment,\
@@ -86,6 +87,12 @@ def cli(ctx, region):
                           aws_session_token=aws_session_token)
     ctx.obj.region = region
 
+@cli.command()
+def version():
+    """
+    drone-deploy version (SemVer)
+    """
+    click.echo(click.style(f'{__version__}', bold=True))
 
 # make sure we are in project root
 check_dir()
