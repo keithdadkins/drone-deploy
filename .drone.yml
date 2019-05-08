@@ -21,6 +21,8 @@ steps:
   commands:
   - . cli/venv/bin/activate
   - make release
+  when:
+    event: tag
 
 - name: publish
   image: plugins/github-release

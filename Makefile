@@ -19,11 +19,13 @@ else
 endif
 
 OSX: pyinstall
-	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-osx
+	cd cli/dist && \
+	@tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 LINUX: pyinstall
-	@mv cli/dist/drone-deploy cli/dist/drone-deploy.x86_64-linux
+	cd cli/dist && \
+	@tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 WINDOWS:
-	@echo Building x86_64 'drone-deploy' on Windows
+	@echo TODO
 
 release: $(OSFLAG)
 
