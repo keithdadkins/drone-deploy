@@ -20,10 +20,10 @@ endif
 
 OSX: pyinstall
 	cd cli/dist && \
-	@tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
+	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 LINUX: pyinstall
 	cd cli/dist && \
-	@tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
+	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 WINDOWS:
 	@echo TODO
 
