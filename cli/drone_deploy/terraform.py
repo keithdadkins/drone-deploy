@@ -91,6 +91,7 @@ class Terraform():
         self.drone_builder_role_arn = arn
 
     def load_tf_state(self):
+        '''Loads terraform state file if able.'''
         try:
             state_file = self.working_dir.joinpath('terraform.tfstate').resolve()
             with open(state_file, "r") as read_file:
@@ -100,6 +101,7 @@ class Terraform():
             self.has_tf_state = False
 
     def init(self):
+        '''Runs 'terraform init' in the working directory.'''
         self.terraform("init")
 
     def plan(self, tf_targets=[]):

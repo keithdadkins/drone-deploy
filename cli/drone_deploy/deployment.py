@@ -40,6 +40,7 @@ class Deployment():
         Loads the config.yaml file.
     write_config(self)
         Writes self.config to disk.
+    TODO: finish documenting class
     """
 
     def __load_param(self, param_name):

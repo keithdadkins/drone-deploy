@@ -87,6 +87,7 @@ def cli(ctx, region):
                           aws_session_token=aws_session_token)
     ctx.obj.region = region
 
+
 @cli.command()
 def version():
     """
@@ -94,27 +95,27 @@ def version():
     """
     click.echo(click.style(f'{__version__}', bold=True))
 
-# make sure we are in project root
-check_dir()
 
-# load env vars from .env file. They will be available, along with any other
-# env vars, by using os.getenv("ENV_VAR_NAME") in the project
-env_path = Path(__file__).parent.joinpath('.env')
-load_dotenv(dotenv_path=env_path)
+def setup():
+    # make sure we are in project root
+    check_dir()
 
-# # pyinstaller statement to make it work with click
-# if getattr(sys, 'frozen', False):
-#     cli(sys.argv[1:])
+    # load env vars from .env file. They will be available, along with any other
+    # env vars, by using os.getenv("ENV_VAR_NAME") in the project
+    env_path = Path(__file__).parent.joinpath('.env')
+    load_dotenv(dotenv_path=env_path)
+
+    # hookup 'drone-deploy' sub commands
+    # cli.add_command(bootstrap)
+    cli.add_command(new_deployment)
+    cli.add_command(edit_deployment)
+    cli.add_command(prepare_deployment)
+    cli.add_command(build_ami)
+    cli.add_command(list_deployments)
+    cli.add_command(show)
+    cli.add_command(plan)
+    cli.add_command(deploy)
+    cli.add_command(destroy)
 
 
-# hookup 'drone-deploy' sub commands
-# cli.add_command(bootstrap)
-cli.add_command(new_deployment)
-cli.add_command(edit_deployment)
-cli.add_command(prepare_deployment)
-cli.add_command(build_ami)
-cli.add_command(list_deployments)
-cli.add_command(show)
-cli.add_command(plan)
-cli.add_command(deploy)
-cli.add_command(destroy)
+setup()
