@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+# Keith D. Adkins <keithdadkins@me.com> - 2019
 # Builds the drone server amazon machine image.
 # Usage: build-drone-server-ami.sh [-h|--help] [-p|--profile] [--no-cache] [--rm]
-
 set -euo pipefail
 
 # aws credentials (use --profile if set, else uses access keys)
@@ -27,7 +27,7 @@ DRONE_AGENT_DOCKER_IMAGE="${DRONE_AGENT_DOCKER_IMAGE:-}"
 # defaults for docker images
 AWS_CLI_BASE_IMAGE="${AWS_CLI_BASE_IMAGE:-python:3.7}"
 PACKER_BASE_IMAGE="${PACKER_BASE_IMAGE:-hashicorp/packer:latest}"
-TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:latest}"
+TERRAFORM_BASE_IMAGE="${TERRAFORM_BASE_IMAGE:-hashicorp/terraform:0.11.14}"
 
 # cli options
 # PURGE == remove docker images at end

@@ -203,6 +203,7 @@ class Deployment():
         self.terraform.init()
 
     def plan(self):
+        # run terraform plan in the deployment dir
         self.terraform.plan()
 
     def build_ami(self):

@@ -170,11 +170,11 @@
   "variables": {
     "name": "drone-server-ami",
     "ssh_username": "ubuntu",
-    "drone_cli_version": "1.0.8",
+    "drone_cli_version": "1.1.2",
     "drone_server_docker_image": "drone/drone:latest",
     "drone_agent_docker_image": "drone/agent:latest",
     "drone_aws_region": "",
-    "drone_docker_compose_version": "1.24.0",
+    "drone_docker_compose_version": "1.24.1",
     "drone_server_host": "",
     "aws_cli_base_image": "python:3.7",
     "drone_deployment_uuid": "",
