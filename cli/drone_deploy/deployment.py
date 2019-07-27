@@ -45,8 +45,6 @@ class Deployment():
 
     def __load_param(self, param_name):
         '''load config from env or from config.yaml if env is not set'''
-        # if param_name == "drone_rpc_secret":
-        #     breakpoint()
         if os.getenv(param_name.upper()):
             # env var exists, set param to its value
             param = os.getenv(param_name.upper(), '')
@@ -107,19 +105,21 @@ class Deployment():
         return param
 
     def __init__(self, config_file):
-        '''Load and parse the deployment config.'''
-        # use ruamel to parse config file (preserves comments)
+        '''
+        Load and parse the deployment config.yaml file.
+        I'm using 'ruamel' to parse config file as it preserves yaml comments.
+        '''
         yaml = YAML()
         self.config_file = config_file
         self.config = yaml.load(self.config_file)
 
-        # list of tuples we want to pass along to terraform/packer (added in __load_params)
+        # list of tuples we'll want to pass to terraform/packer (added via self.__load_param())
         self.tf_vars = []
 
         # The 'drone_deployment_name' is dynamically created from the name of the deployment
         # directory and is used for naming resources in AWS. In order to keep aws resources
-        # clearly labeled, we append 'drone' to the name if the user hasn't already. E.g.,
-        # 'drone-deploy new dev' -> '/deployments/dev' -> 'drone-dev-...' aws resource name
+        # clearly labeled we append 'drone' to the name if the user hasn't already. E.g.,
+        # 'drone-deploy new dev' creates dir '/deployments/dev' and creates 'drone-dev-foo' aws resource name
         if not os.getenv('DRONE_DEPLOYMENT_NAME'):
             if not self.config.get('drone_deployment_name'):
                 # deployment name wasn't overidden via env var or in the config.yaml file, so
@@ -199,28 +199,27 @@ class Deployment():
         self.packer = Packer(packer_dir, packer_vars=packer_vars)
 
     def init(self):
-        # run terraform init in the deployment dir
+        '''runs terraform init in the deployment dir'''
         self.terraform.init()
 
     def plan(self):
-        # run terraform plan in the deployment dir
+        '''runs terraform plan in the deployment dir'''
         self.terraform.plan()
 
     def build_ami(self):
-        # build the ami
+        '''builds the drone server ami using packer'''
         self.packer.build_ami()
 
     def deploy(self, targets=[]):
-        '''apply terraform resources'''
+        '''runs `terraform apply`'''
         self.terraform.apply(targets)
 
     def destroy(self):
-        '''destroys terraform resources'''
+        '''destroys/deletes terraform resources and directory (optional)'''
         self.terraform.destroy()
 
     def deployment_status(self, deployment_name):
-        '''returns the state of the deployment'''   
-
+        '''returns the current state of the deployment'''
         # packer
         if self.packer.new_build:
             print(f"AMI has not been built. Run 'drone-deploy prepare {deployment_name}'"

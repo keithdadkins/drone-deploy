@@ -26,6 +26,16 @@ class Terraform():
 
 
     """
+    SUPPORTED_TF_VERSION = 'Terraform v0.11.14'
+    TERRAFORM_VERSION_MSG = f"""
+    {SUPPORTED_TF_VERSION} is the only version of Terraform currently supported for now, as
+    terraform underwent a major upgrade (v11 -> v12) during development which introduced
+    breaking changes in the TF configuration language.
+
+    Please install {SUPPORTED_TF_VERSION} and try again.
+
+    """
+
     def __init__(self, working_dir, tf_vars=[]):
         # tfvars should be a list of tuples (key,value)
         self.working_dir = working_dir
@@ -36,7 +46,11 @@ class Terraform():
         self.load_tf_state()
 
     def __use_local_cmd(self):
-        # terraform is installed
+        '''
+        Define a class method to proxy/wrap our terraform commands. 
+        deployment = Deployment(deployment_dir)
+        deployment.plan()
+        '''
         def terraform(command, tf_targets=None, tf_args=None):
             if tf_targets:
                 command = f"terraform {command} {tf_targets}"
@@ -46,7 +60,7 @@ class Terraform():
             if tf_args:
                 command = f"{command} {tf_args}"
 
-            # pass our env vars along to the sub process
+            # pass our env vars along to the sub process when executed
             env = os.environ
             p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                                  cwd=self.working_dir, env=env)
@@ -57,11 +71,17 @@ class Terraform():
                 if out != '':
                     sys.stdout.write(out)
                     sys.stdout.flush()
-        self.terraform = terraform
+            # check for errors
+            if p.returncode != 0:
+                # check for valid terraform version
+                print("Terraform version check... ")
+                current_ver = subprocess.call(["terraform", "version"])
+                if current_ver != self.SUPPORTED_TF_VERSION:
+                    print(self.TERRAFORM_VERSION_MSG)
 
-    def __use_docker_cmd():
-        '''TODO: Use docker to run terraform.'''
-        pass
+                # TODO: handle any other terraform errors
+
+        self.terraform = terraform
 
     @property
     def tf_vars(self):
@@ -91,7 +111,7 @@ class Terraform():
         self.drone_builder_role_arn = arn
 
     def load_tf_state(self):
-        '''Loads terraform state file if able.'''
+        '''Loads terraform state file if present.'''
         try:
             state_file = self.working_dir.joinpath('terraform.tfstate').resolve()
             with open(state_file, "r") as read_file:
