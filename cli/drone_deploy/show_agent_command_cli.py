@@ -36,10 +36,13 @@ def show_agent_command(deployment_name):
     rpc_secret = deployment.config['drone_rpc_secret']
     agent_image = deployment.config['drone_agent_docker_image']
 
-    docker_command = f'''docker run -v /var/run/docker.sock:/var/run/docker.sock \\
-        -e DRONE_RPC_SERVER=https://{deployment_name} \\
-        -e DRONE_RUNNER_CAPACITY=1 \\
-        -e DRONE_RPC_SECRET={rpc_secret} \\
-        -d {agent_image}
+    docker_command = f'''
+        # Run the following command on a host running docker to launch a build agent:
+
+        docker run -v /var/run/docker.sock:/var/run/docker.sock \\
+            -e DRONE_RPC_SERVER=https://{deployment_name} \\
+            -e DRONE_RUNNER_CAPACITY=1 \\
+            -e DRONE_RPC_SECRET={rpc_secret} \\
+            -d {agent_image}
     '''
     print(docker_command)
