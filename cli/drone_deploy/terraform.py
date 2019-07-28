@@ -6,25 +6,40 @@ import subprocess
 
 class Terraform():
     """
-    Simple wrapper class for running terraform commands.
-
-    Can run terraform commands via Docker or locally if installed.
+    Simple wrapper class for running terraform commands. The main Deployment class creates an
+    instance of this class when a deployment is instantiated. E.g.,
+        deployment = Deployment(config_file)
+        deployment.terraform.plan()
 
     Required Attributes
     ----------
     working_dir: directory
         The full path to the directory with .tf resources.
 
-    Optional Attributes
+    Properties
     ----------
     tf_vars: list
-        A list of terraform varibles (in key, value pairs format) to
-        run with each terraform command (apply, plan, etc).
+        A list of terraform variables (tuples) to run with each terraform command.
+    drone_builder_role_arn: string
+        Automatically set if an ARN is found in the deployments tfstate file.
 
     Methods
     -------
-
-
+    __use_local_cmd
+        Defines a class method to proxy terraform. The '__use_local_cmd' is there as initially
+        the idea was to allow the user to run terraform from docker or locally if installed.
+        Only locally is supported for now as mounting .gitconfig, deployment dirs, etc is not
+        ideal.
+    load_tf_state
+        Loads terraform state file if present.
+    init
+        Runs `terraform init` in the deployment dir.
+    plan
+        Runs `terraform plan` in the deployment dir.
+    apply
+        Runs `terraform apply` in the deployment dir.
+    destroy
+        Runs `terraform destroy` in the deployment dir.
     """
     SUPPORTED_TF_VERSION = 'Terraform v0.11.14'
     TERRAFORM_VERSION_MSG = f"""
@@ -47,9 +62,7 @@ class Terraform():
 
     def __use_local_cmd(self):
         '''
-        Define a class method to proxy/wrap our terraform commands. 
-        deployment = Deployment(deployment_dir)
-        deployment.plan()
+        Define a class method to proxy terraform.
         '''
         def terraform(command, tf_targets=None, tf_args=None):
             if tf_targets:
@@ -135,6 +148,3 @@ class Terraform():
     def destroy(self, tf_targets=[]):
         '''Runs 'terraform destroy' in the working directory.'''
         self.terraform("destroy", tf_targets)
-
-    def status(self):
-        pass

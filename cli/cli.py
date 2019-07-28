@@ -22,12 +22,12 @@ def check_dir():
 
 def aws_session(aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None,
                 profile_name=None):
-    """
+    '''
     Returns a boto3 session we can pass around using click's context object. This is the session
     that the app and api uses to communicate with AWS. Notes:
         - Uses access keys over profile if available.
         - Uses callers region if region_name is not set.
-    """
+    '''
     session = boto3.session.Session()
 
     # try to get a session using aws access keys first

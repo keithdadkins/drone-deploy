@@ -32,15 +32,34 @@ class Deployment():
     Required Attributes
     ----------
     config_file: file
-        The full path to our drone config.yaml file.
+        The full path to a deployment's config.yaml file.
 
     Methods
     -------
+    __load_param(self, param_name):
+        Loads specified configs from env vars or from config.yaml if env is not set.
     __init__(self, config_file)
         Loads the config.yaml file.
-    write_config(self)
-        Writes self.config to disk.
-    TODO: finish documenting class
+    setup_terraform
+        Attaches an instance of class Terraform to the deployment instance. E.g., mydeploy.terraform.plan().
+    setup_packer
+        Attaches an instance of class Packer to the deployment instance. E.g., mydeploy.packer.build_ami().
+    write_config
+        Writes config settings to disk.
+    generate_rpc(self, num_bytes=16)
+        Returns a random hexadecimal token (defaults to 128bit) used for rpc secrets.
+    init
+        Runs `terraform init` in the deployment dir.
+    plan
+        Runs `terraform plan` in the deployment dir.
+    deploy
+        Runs `terraform apply` in the deployment dir.
+    destroy
+        Runs `terraform destroy` in the deployment dir.
+    build_ami
+        Builds the drone server ami using packer.
+    deployment_status
+        Returns the current state of the deployment.
     """
 
     def __load_param(self, param_name):
