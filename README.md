@@ -77,6 +77,7 @@ The primary goal of a deployment is to:
 
 1. 
 2. 
+3. To enable bash auto-completion: `eval "$(_DRONE_DEPLOY_COMPLETE=source drone-deploy)"`
 
 ## Using the CLI
 
