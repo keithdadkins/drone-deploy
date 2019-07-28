@@ -85,11 +85,12 @@ class Deployment():
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
 
-        # flatten user-filter for docker-compose (convert from ruamel and remove brackets), ticks, and spaces
+        # flatten user-filter for docker-compose (convert ruamel / remove brackets), ticks, spaces
         if param_name == "drone_user_filter":
             patched_param = []
-            patched_param = list(param)
-            param = repr(patched_param).replace('[', '').replace(']', '').replace("'", "").replace(" ", "")
+            if param:
+                patched_param = list(param)
+                param = repr(patched_param).replace('[', '').replace(']', '').replace("'", "").replace(" ", "")
 
         # convert yaml arrays to something hashi compatable.
         if type(param) == ruamel.yaml.comments.CommentedSeq:
