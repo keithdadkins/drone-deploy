@@ -3,7 +3,7 @@ from setuptools import setup, setuptools, find_packages
 
 setup(
     name='drone-deploy',
-    version='0.1.0',
+    version='0.1.4',
     license='TODO',
     url='TODO',
     packages=find_packages(
