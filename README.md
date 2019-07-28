@@ -13,7 +13,7 @@ The primary goals of this project:
 ### `drone-deploy` CLI Overview
 
 The `drone-deploy` cli app is used to manage one or more drone server __'deployments'__. More specifically, it (using Packer, Terraform, bash scripts, etc) builds, deploys, and configures an Amazon EC2 instance to run a dedicated DroneCI server along with a custom domain name and https certificates.
-
+ 
 
 Here are some example commands to give you an idea of how the app works, but please refer to the [drone-deploy user guide](./drone-deploy-user-guide.md) for detailed instructions.
 
