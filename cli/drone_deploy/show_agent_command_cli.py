@@ -1,4 +1,3 @@
-import os
 import click
 from pathlib import Path
 from drone_deploy.deployment import Deployment
@@ -45,4 +44,4 @@ def show_agent_command(deployment_name):
             -e DRONE_RPC_SECRET={rpc_secret} \\
             -d {agent_image}
     '''
-    print(docker_command)
+    click.echo(docker_command)

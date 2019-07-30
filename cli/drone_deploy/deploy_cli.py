@@ -3,7 +3,7 @@ from pathlib import Path
 from drone_deploy.deployment import Deployment
 
 
-def list_deployments(ctx, args, incomplete):
+def list_deployments(args, incomplete):
     """
     Display list of deployments for bash autocompletion
     """
@@ -21,8 +21,7 @@ def list_deployments(ctx, args, incomplete):
 # $> drone-deploy deploy [deployment name]
 @click.group(invoke_without_command=True)
 @click.argument('deployment_name', type=click.STRING, autocompletion=list_deployments)
-@click.pass_obj
-def deploy(aws, deployment_name):
+def deploy(deployment_name):
     """
     Deploys (runs 'terraform apply') on <deployment_name> resources.
 
@@ -41,7 +40,7 @@ def deploy(aws, deployment_name):
                    "Run 'drone-deploy list' to see available deployemnts.")
         return False
 
-    # # load the deployment
+    # load the deployment
     deployment = Deployment(deployment_dir)
     click.echo(f"Deploying {deployment_name}...")
     deployment.deploy()

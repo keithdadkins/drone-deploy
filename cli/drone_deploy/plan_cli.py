@@ -21,8 +21,7 @@ def list_deployments(ctx, args, incomplete):
 # $> drone-deploy plan [deployment name]
 @click.group(invoke_without_command=True)
 @click.argument('deployment_name', type=click.STRING, autocompletion=list_deployments)
-@click.pass_obj
-def plan(aws, deployment_name):
+def plan(deployment_name):
     """
     Runs 'terraform plan' on <deployment_name>.
 

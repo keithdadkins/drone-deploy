@@ -22,8 +22,7 @@ def list_deployments(ctx, args, incomplete):
 @click.group(invoke_without_command=True)
 @click.argument('deployment_name', type=click.STRING, autocompletion=list_deployments)
 @click.option('--rm/--no-rm', default=False)
-@click.pass_obj
-def destroy(aws, deployment_name, rm):
+def destroy(deployment_name, rm):
     """
     !!! Destroys (runs 'terraform destroy') on <deployment_name> resources.
 
