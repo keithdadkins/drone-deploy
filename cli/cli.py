@@ -99,7 +99,7 @@ def version():
 
 def setup():
     # make sure we are in project root
-    check_dir()
+    # check_dir()
 
     # load env vars from .env file. They will be available, along with any other
     # env vars, by using os.getenv("ENV_VAR_NAME") in the project

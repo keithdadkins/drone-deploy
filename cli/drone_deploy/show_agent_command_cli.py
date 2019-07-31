@@ -45,3 +45,5 @@ def show_agent_command(deployment_name):
             -d {agent_image}
     '''
     click.echo(docker_command)
+
+ 
