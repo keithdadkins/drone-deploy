@@ -11,7 +11,7 @@ steps:
   - . cli/venv/bin/activate
   - make
   - make testdeployment
-  - make smoketest
+  - make test
 
 - name: x86_64-linux
   platform:
