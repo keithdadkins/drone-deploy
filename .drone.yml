@@ -20,6 +20,7 @@ steps:
   image: python:3.7
   commands:
   - . cli/venv/bin/activate
+  - make coverage
   - make release
   when:
     event: tag

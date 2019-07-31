@@ -73,7 +73,7 @@ test:
 	pytest --rootdir=cli cli/tests
 
 coverage:
-	pytest --rootdir=cli --cov-config=cli/.coveragerc --cov=cli -vv cli/tests
+	pytest --rootdir=cli --cov-config=cli/.coveragerc -vv cli/tests
 
 clean:
 	rm -rf cli/dist \
