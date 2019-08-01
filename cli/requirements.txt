@@ -9,3 +9,5 @@ PyYAML==5.1
 ruamel.yaml==0.15.94
 wheel==0.33.1
 pylint
+pytest
+pytest-mock
