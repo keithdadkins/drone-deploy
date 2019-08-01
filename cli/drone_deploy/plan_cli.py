@@ -40,9 +40,6 @@ def plan(deployment_name):
                    "Run 'drone-deploy list' to see available deployemnts.")
         return False
 
-    # # load the deployment
+    # load the deployment
     deployment = Deployment(deployment_dir)
     deployment.plan()
-    
-    # # apply
-    # click.echo(f"Deploying {deployment_name}")
