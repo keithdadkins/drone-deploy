@@ -55,6 +55,7 @@ def test_new_deployment_packer_templates_present(new_deployment):
 
 
 def test_new_deployment_packer_build_script(new_deployment):
+    '''test packer yaml file by attempting to load it and by checking a key'''
     build_script = Path.cwd().joinpath('deployments', 'foo', 'packer', 'packer_build_drone_server_ami.json').resolve()
     with open(build_script) as json_file:
         try:
@@ -65,6 +66,7 @@ def test_new_deployment_packer_build_script(new_deployment):
 
 
 def test_new_deployment_docker_compose_file(new_deployment):
+    '''test docker compose file for valid yaml and make sure it's version 3'''
     compose_file = Path.cwd().joinpath('deployments', 'foo', 'packer', 'drone-server-configs', 'docker-compose.yaml').resolve()
     assert compose_file.exists(), "Could not find docker-compose.yaml file in new deployemnt."
 
