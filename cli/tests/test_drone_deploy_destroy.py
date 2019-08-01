@@ -1,7 +1,5 @@
 from cli import cli
 from pathlib import Path
-from drone_deploy.deployment import Deployment
-from drone_deploy.deployment import Terraform
 
 
 def test_destroy_deployment(runner, terraform_cmd, mocker):

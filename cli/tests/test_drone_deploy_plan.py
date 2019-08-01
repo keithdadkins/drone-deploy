@@ -1,6 +1,5 @@
 import subprocess
 from cli import cli
-from pathlib import Path
 
 
 def test_cli_plan(runner, new_deployment, mocker):
