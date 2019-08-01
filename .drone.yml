@@ -5,7 +5,7 @@ steps:
 - name: test
   image: python:3.7
   environment:
-  - EDITOR: vim
+    EDITOR: vim
   commands:
   - pip install --upgrade pip setuptools
   - make virtualenv
