@@ -59,9 +59,9 @@ def teardown_test_dir(test_dir):
         shutil.rmtree(test_dir)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def new_deployment(runner):
-    # create a new deployment for testing templates
+    # create a new deployment 'foo'
     result = runner.invoke(cli, ["new", "foo"])
     return result
 
