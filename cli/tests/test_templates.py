@@ -31,12 +31,11 @@ def test_new_deployment_config_yaml_present_and_valid(new_deployment):
 def test_new_deployment_terraform_templates_present_and_valid(new_deployment, terraform_cmd):
     foo_path = Path.cwd().joinpath('deployments', 'foo', 'terraform').resolve()
 
-    # should be at least 7 files in the terraform dir
+    # should be at least 7 .tf files in the terraform dir
     assert count_files(foo_path) >= 7, "missing some/all terraform config files in new deployment"
 
     # validate terraform configs
-    # assert terraform_cmd('validate', foo_path), "Found invalid terraform syntax in new deployment."
-    pass
+    assert terraform_cmd('validate', foo_path, tf_args="--check-variables=false") == 0, "Found invalid terraform syntax in a new deployment."
 
 
 def test_new_deployment_packer_templates_present(new_deployment):

@@ -23,10 +23,17 @@ def terraform_cmd():
         # to 'terraform init' aws module, which would greatly slow down testing
         terra_cache = Path(os.getcwd()).parent.joinpath('cache', '.terraform')
         if terra_cache.exists():
-            shutil.copytree(terra_cache, working_dir.joinpath('.terraform'))
+            try:
+                shutil.copytree(terra_cache, working_dir.joinpath('.terraform'))
+            except Exception:
+                pass
 
         # pass our env vars along to the sub process when executed
         env = os.environ
+        ## print out exportable list of variables for debugging
+        # vars = [k for k in env if 'TF_VAR_' in k or 'DRONE_' in k]
+        # for k in vars:
+        #     print(f'export {k}="{env[k]}"')
         p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                              cwd=working_dir, env=env)
         while True:
@@ -34,8 +41,10 @@ def terraform_cmd():
             if out == '' and p.poll() is not None:
                 break
             if out != '':
+                pass
                 sys.stdout.write(out)
                 sys.stdout.flush()
+        return p.returncode
     return terraform
 
 
