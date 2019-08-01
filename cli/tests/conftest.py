@@ -25,6 +25,8 @@ def terraform_cmd():
         if terra_cache.exists():
             try:
                 shutil.copytree(terra_cache, working_dir.joinpath('.terraform'))
+                if command == "terraform init":
+                    return
             except Exception:
                 pass
 
