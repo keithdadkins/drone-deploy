@@ -16,7 +16,7 @@ steps:
   - . cli/venv/bin/activate
   - make
   - make testdeployment
-  - make coverage
+  - make test
 
 - name: x86_64-linux
   platform:
@@ -25,7 +25,7 @@ steps:
   image: python:3.7
   commands:
   - . cli/venv/bin/activate
-  - make coverage
+  - make test
   - make release
   volumes:
   - name: terraform
