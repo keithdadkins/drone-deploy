@@ -49,7 +49,10 @@ def prepare_deployment(deployment_name):
 
     # load the deployment, run terraform init, and apply roles and policies
     deployment = Deployment(deployment_dir)
-    deployment.init()
+    try:
+        deployment.init()
+    except Exception:
+        pass
 
     # Apply needed IAM roles and policies for building/deploying ami
     targets = ' '.join("-target={}".format(t) for t in [
@@ -59,11 +62,5 @@ def prepare_deployment(deployment_name):
         "aws_iam_policy_attachment.s3",
         "aws_iam_instance_profile.drone-builder"
     ])
-    # breakpoint()
-    # print(os.environ)
-    deployment.deploy(targets)
-    # deployment.bootstrap_roles_and_policies()
 
-    # get the drone_builder_role_arn that was generated during the bootstrap
-    # ie., sets deployment.drone_builder_role_arn
-    # deployment.load_tf_outputs()
+    deployment.deploy(targets)
