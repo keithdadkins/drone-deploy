@@ -74,6 +74,15 @@ class Packer():
             self.drone_server_ami = ''
             pass
 
+        except json.decoder.JSONDecodeError as e:
+            print("The packer manifest.json file appears to be corrupt.")
+            print(f"Please review {manifest_file} for errors and either fix or remove.")
+            print("---------")
+            print(type(e))
+            print(e.args)
+            print(e)
+            return e
+
     def build_ami(self):
         '''Builds the ami for the deployment.'''
         # Just run the build-drone-server-ami.sh script
@@ -93,11 +102,13 @@ class Packer():
                 if out != '':
                     sys.stdout.write(out)
                     sys.stdout.flush()
+
+            # update the manifest
+            self.load_artifacts()
+
         except Exception as e:
+            self.load_artifacts()
             print(type(e))
             print(e.args)
             print(e)
             return False
-
-        # update the manifest
-        self.load_artifacts()
