@@ -19,13 +19,9 @@ def test_new_deployment_config_yaml_present_and_valid(new_deployment):
     # load config to test for valid yaml
     try:
         yaml = YAML()
-        config = yaml.load(config_file)
+        yaml.load(config_file)
     except Exception:
         assert False, "config.yaml contains invalid json."
-
-    # check a few keys for default values
-    assert 'your_github_user_name' in config['drone_admin'], "a new config.yaml did not contain default value for github username (your_github_user_name)"
-    assert 'https' in config['drone_server_proto'], "a new config.yaml did not contain default value for drone_server_proto (https)"
 
 
 def test_new_deployment_terraform_templates_present_and_valid(new_deployment, terraform_cmd):

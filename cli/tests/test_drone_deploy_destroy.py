@@ -3,7 +3,7 @@ from cli import cli
 from pathlib import Path
 
 
-def test_destroy_deployment(runner, terraform_cmd, mocker):
+def test_cli_destroy_deployment(runner, terraform_cmd, mocker):
     '''drone-deploy destroy'''
     # create a new deployment for testing
     result = runner.invoke(cli, ["new", "foobar"])
@@ -18,7 +18,7 @@ def test_destroy_deployment(runner, terraform_cmd, mocker):
     assert subprocess.Popen.call_count == 1, "'drone-deploy destroy' should only call 'terraform destroy' once."    # noqa
 
 
-def test_destroy_deployment_with_rm(runner, terraform_cmd, mocker):
+def test_cli_destroy_deployment_with_rm(runner, terraform_cmd, mocker):
     '''drone-deploy destroy --rm'''
     # create a new deployment for testing
     result = runner.invoke(cli, ["new", "foobar-rm"])
@@ -44,7 +44,7 @@ def test_destroy_deployment_with_rm(runner, terraform_cmd, mocker):
         assert False, 'Error creating a deployment "foobar" when testing destroy.'
 
 
-def test_duplicate_deployments_not_allowed(runner):
+def test_cli_duplicate_deployments_not_allowed(runner):
     '''drone-deploy new foobar.acme.com'''
     runner.invoke(cli, ["new", "foobar.acme.com"])
     result = runner.invoke(cli, ["new", "foobar.acme.com"])
