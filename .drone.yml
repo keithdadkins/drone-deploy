@@ -15,8 +15,8 @@ steps:
   - make venv
   - . cli/venv/bin/activate
   - make
-  - make testdeployment
-  - make test
+  # - make testdeployment
+  - make coverage
 
 - name: x86_64-linux
   platform:
