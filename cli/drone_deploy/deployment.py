@@ -98,7 +98,7 @@ class Deployment():
             os.environ[param_name.upper()] = self.config[param_name]
             param = self.config[param_name]
 
-        # get the drone_server_ami from packer
+        # get the drone_server_ami from packer unless env var is set
         if param_name == "drone_server_ami" and not param:
             self.config[param_name] = self.packer.drone_server_ami
             os.environ[param_name.upper()] = self.config[param_name]
@@ -109,7 +109,10 @@ class Deployment():
             patched_param = []
             if param:
                 patched_param = list(param)
-                param = repr(patched_param).replace('[', '').replace(']', '').replace("'", "").replace(" ", "")
+                param = repr(patched_param)
+                param = param.replace('[', '').replace("]", '')
+                param = param.replace("'", "")
+                param = param.replace(" ", "")
 
         # convert yaml arrays to something hashi compatable.
         if type(param) == ruamel.yaml.comments.CommentedSeq:
@@ -187,12 +190,6 @@ class Deployment():
         self.__load_param("drone_deployment_id")
         self.__load_param("drone_server_ami")
 
-        # is this a new deployment?
-        if self.packer.new_build and self.terraform.has_tf_state:
-            self.new_deployment = True
-        else:
-            self.new_deployment = False
-
     def __str__(self):
         '''returns pretty formatted yaml'''
         return str(ruamel.yaml.round_trip_dump(self.config))
@@ -222,9 +219,9 @@ class Deployment():
         '''runs terraform init in the deployment dir'''
         self.terraform.init()
 
-    def plan(self):
+    def plan(self, targets=[]):
         '''runs terraform plan in the deployment dir'''
-        self.terraform.plan()
+        self.terraform.plan(targets)
 
     def build_ami(self):
         '''builds the drone server ami using packer'''
@@ -234,13 +231,34 @@ class Deployment():
         '''runs `terraform apply`'''
         self.terraform.apply(targets)
 
-    def destroy(self):
+    def destroy(self, targets=[]):
         '''destroys/deletes terraform resources and directory (optional)'''
-        self.terraform.destroy()
+        self.terraform.destroy(targets)
 
-    def deployment_status(self, deployment_name):
+    @property
+    def deployment_status(self):
         '''returns the current state of the deployment'''
+        status = '---\n'
+        deployment_name = self.config.get('drone_deployment_name')
         # packer
-        if self.packer.new_build:
-            print(f"AMI has not been built. Run 'drone-deploy prepare {deployment_name}'"
-                  f"and 'drone-deploy build-ami {deployment_name}' to build")
+        if self.packer.new_build and not self.config.get('drone_server_ami'):
+            status += f"AMI has not been built. Run 'drone-deploy prepare {deployment_name}'\n"
+            status += f" and 'drone-deploy build-ami {deployment_name}' to build\n"
+        else:
+            status += f"drone-server-ami is set to {self.config.get('drone_server_ami')}\n"
+
+        # terraform
+        if self.terraform.has_tf_state:
+            status += f"{deployment_name} has been deployed.\n\n"
+        else:
+            status += f"{deployment_name} has not been deployed.\n\n"
+
+        # ssh tips
+        if self.terraform.has_tf_state:
+            status += f"You can add the following to your ~/.ssh/config to enable easy ssh access. E.g., `ssh {deployment_name}`\n"
+            status += f'\tHost "{deployment_name}"\n'
+            status += f'\t\tHostName "{deployment_name}"\n'
+            status += "\t\tUser ubuntu\n"
+            status += "\t\tIdentityFile ~/path/to/your/key-pair.pemfile\n"
+
+        return status

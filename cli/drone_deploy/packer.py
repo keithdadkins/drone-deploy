@@ -58,7 +58,8 @@ class Packer():
             manifest_file = self.working_dir.joinpath('manifest.json').resolve()
             with open(manifest_file, "r") as read_file:
                 self.manifest = json.load(read_file)
-
+            self.new_build = False
+            
             # artifact_id = region:ami (us-east-1:ami-adfsdf23423443)
             build = self.manifest["builds"][0]["artifact_id"].split(':')
             self.drone_server_ami = build[1]
@@ -66,7 +67,6 @@ class Packer():
             # drone_deploy_id
             deploy_id = self.manifest["builds"][0]["custom_data"]["drone_deployment_id"]
             self.drone_deployment_id = deploy_id
-            self.new_build = False
 
         except FileNotFoundError:
             self.new_build = True

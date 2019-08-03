@@ -33,6 +33,4 @@ def show(deployment_name):
     # load the deployment
     deployment = Deployment(deployment_dir)
     click.echo(deployment)
-
-    # TODO
-    deployment.deployment_status(deployment_name)
+    click.echo(deployment.deployment_status)
