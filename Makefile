@@ -93,9 +93,6 @@ purge: clean
 	rm -rf cli/__pycache__ \
 	rm -rf cli/drone_deploy/__pycache__
 
-testdeployment:
-	@drone-deploy new testdeployment
-
 help:
 	@echo Make options are:
 	@echo make venv - Install and setup a python virtual environment for the project.

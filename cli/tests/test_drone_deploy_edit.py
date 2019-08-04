@@ -4,6 +4,7 @@ from cli import cli
 
 def test_cli_edit(runner, new_deployment, mocker):
     '''drone-deploy show'''
+    os.environ["EDITOR"] = "vim"
     mocker.patch('os.system')
     runner.invoke(cli, ["edit", "foo"])
     call_list = f'{os.system.call_args}'    # noqa
