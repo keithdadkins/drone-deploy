@@ -60,12 +60,12 @@ steps:
   image: python:3.7
   environment:
     EDITOR: vim
-    PATH: /usr/local/opt/python/libexec/bin:$PATH
+    PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
   volumes:
   - name: terraform
     path: /usr/local/bin/terraform
   commands:
-  - pip install --upgrade pip setuptools
+  # - pip install --upgrade pip setuptools
   - make virtualenv
   - make venv
   - . cli/venv/bin/activate
