@@ -42,7 +42,7 @@ kind: pipeline
 name: os-x
 
 platform:
-  os: osx
+  os: macos
   arch: amd64
 
 steps:
