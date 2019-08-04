@@ -65,6 +65,7 @@ steps:
   - name: terraform
     path: /usr/local/bin/terraform
   commands:
+  - pip install --upgrade pip==19.1.1
   # - pip install --upgrade pip setuptools
   - make virtualenv
   - make venv
