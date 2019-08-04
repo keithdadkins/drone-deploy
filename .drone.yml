@@ -37,6 +37,14 @@ volumes:
   host:
     path: /usr/local/bin/terraform
 
+
+trigger:
+  branch:
+  - master
+  event:
+  - push
+  - tag
+
 ---
 # https://github.com/drone-runners/drone-runner-exec
 kind: pipeline
@@ -52,11 +60,11 @@ steps:
   image: python:3.7
   environment:
     EDITOR: vim
+    PATH: /usr/local/opt/python/libexec/bin:$PATH
   volumes:
   - name: terraform
     path: /usr/local/bin/terraform
   commands:
-  - sudo easy_install pip
   - pip install --upgrade pip setuptools
   - make virtualenv
   - make venv
