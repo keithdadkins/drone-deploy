@@ -32,6 +32,21 @@ steps:
   when:
     event: tag
 
+- name: x86_64-osx
+  platform:
+    os: mac
+    arch: amd64
+  image: python:3.7
+  commands:
+  - . cli/venv/bin/activate
+  - make test
+  - make release
+  volumes:
+  - name: terraform
+    path: /usr/local/bin/terraform
+  when:
+    event: tag
+
 - name: publish
   image: plugins/github-release
   settings:
