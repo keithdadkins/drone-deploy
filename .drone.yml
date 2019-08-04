@@ -23,6 +23,7 @@ steps:
     arch: amd64
   image: python:3.7
   commands:
+  - env
   - . cli/venv/bin/activate
   - make test
   - make release
@@ -64,10 +65,6 @@ steps:
     PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
     GITHUB_API_TOKEN:
       from_secret: repo_api_key
-    OWNER:
-      from_secret: OWNER
-    REPO:
-      from_secret: REPO
   commands:
   # ensure homebrew and terraform are installed on runner mac and reinstall python because of bug:
   # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
