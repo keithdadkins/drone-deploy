@@ -21,11 +21,15 @@ endif
 OSX: pyinstall
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
-	../../scripts/upload-github-release-asset.sh \
+	chmod +x scripts/upload-release.sh
+	export PATH=$(pwd)/scripts:$(PATH)
+	readarray -d / -t repovar <<< "$(DRONE_REPO)"
+	upload-github-release-asset.sh \
 		github_api_token=$(GITHUB_API_TOKEN) \
-		owner=$(OWNER) \
-		repo=$(REPO) \
-		tag=$(TAG) filename=drone-deploy.x86_64-linux.tar.gz
+		owner=$(repovar[0]) \
+		repo=$(repovar[1]) \
+		tag=$(DRONE_TAG) \
+		filename=cli/dist/drone-deploy.x86_64-linux.tar.gz)
 LINUX: pyinstall
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-linux.tar.gz drone-deploy
