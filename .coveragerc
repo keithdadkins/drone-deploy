@@ -8,6 +8,3 @@ omit =
     setup.py
     scratch*.py
 
-[html]
-directory=./htmlcov
-

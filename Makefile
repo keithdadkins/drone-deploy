@@ -67,13 +67,13 @@ lint:
 	pylint $(PROJ_SLUG)
 
 smoketest:
-	pytest --rootdir=cli --cov-config=cli/.coveragerc -k "smoke" -vv cli/tests
+	pytest --rootdir=cli -k "smoke" -vv cli/tests
 
 test:
 	pytest --rootdir=cli cli/tests
 
 coverage:
-	pytest --rootdir=cli --cov-config=cli/.coveragerc -vv cli/tests
+	pytest --rootdir=cli --cov=cli --cov-config=.coveragerc cli/tests
 
 clean:
 	rm -rf cli/dist \
