@@ -23,13 +23,13 @@ OSX: pyinstall
 	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 	chmod +x scripts/upload-release.sh
 	export PATH=$(pwd)/scripts:$(PATH)
-	readarray -d / -t repovar <<< "$(DRONE_REPO)"
+	IFS='/' read -a repovars <<< "$(DRONE_REPO)"
 	upload-github-release-asset.sh \
 		github_api_token=$(GITHUB_API_TOKEN) \
-		owner=$(repovar[0]) \
-		repo=$(repovar[1]) \
+		owner=$(repovars[0]) \
+		repo=$(repovars[1]) \
 		tag=$(DRONE_TAG) \
-		filename=cli/dist/drone-deploy.x86_64-linux.tar.gz)
+		filename=cli/dist/drone-deploy.x86_64-osx.tar.gz)
 LINUX: pyinstall
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-linux.tar.gz drone-deploy
