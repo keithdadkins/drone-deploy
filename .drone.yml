@@ -41,6 +41,7 @@ volumes:
 trigger:
   branch:
   - master
+  - develop
   event:
   - push
   - tag
@@ -61,35 +62,17 @@ steps:
   environment:
     EDITOR: vim
     PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
-  volumes:
-  - name: terraform
-    path: /usr/local/bin/terraform
   commands:
+  # ensure homebrew and terraform are installed on runner mac and reinstall python because of bug:
+  # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
   - brew reinstall python
-  # - pip install --upgrade pip setuptools
   - make virtualenv
   - make venv
   - . cli/venv/bin/activate
   - make
-  - make coverage
-
-- name: release-x86_64-osx
-  image: python:3.7
-  commands:
-  - . cli/venv/bin/activate
   - make test
   - make release
-  volumes:
-  - name: terraform
-    path: /usr/local/bin/terraform
-  when:
-    event: tag
-
 
 trigger:
-  branch:
-  - master
-  - develop
   event:
-  - push
   - tag
