@@ -40,6 +40,7 @@ volumes:
 ---
 # https://github.com/drone-runners/drone-runner-exec
 kind: pipeline
+type: exec
 name: os-x
 
 platform:
