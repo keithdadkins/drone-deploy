@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 steps:
-- name: test
+- name: test-x86_64-linux
   image: python:3.7
   environment:
     EDITOR: vim
@@ -17,7 +17,7 @@ steps:
   - make
   - make coverage
 
-- name: x86_64-linux
+- name: release-x86_64-linux
   platform:
     os: linux
     arch: amd64
@@ -38,15 +38,31 @@ volumes:
     path: /usr/local/bin/terraform
 
 ---
+# https://github.com/drone-runners/drone-runner-exec
 kind: pipeline
 name: os-x
 
 platform:
-  os: macOS
+  os: darwin
   arch: amd64
 
 steps:
-- name: x86_64-osx
+- name: test-x86_64-osx
+  image: python:3.7
+  environment:
+    EDITOR: vim
+  volumes:
+  - name: terraform
+    path: /usr/local/bin/terraform
+  commands:
+  - pip install --upgrade pip setuptools
+  - make virtualenv
+  - make venv
+  - . cli/venv/bin/activate
+  - make
+  - make coverage
+
+- name: release-x86_64-osx
   image: python:3.7
   commands:
   - . cli/venv/bin/activate
@@ -55,6 +71,9 @@ steps:
   volumes:
   - name: terraform
     path: /usr/local/bin/terraform
+  when:
+    event: tag
+
 
 trigger:
   branch:
@@ -63,25 +82,3 @@ trigger:
   event:
   - push
   - tag
-
-# kine: pipeline
-# name: linux-cli-build
-
-# platform:
-#   os: linux
-#   arch: amd64
-
-# steps:
-# - name: linux-cli-build
-#   image: python:3.7-alpine
-#   commands:
-#   - cd cli
-#   - pip install --upgrade pip setuptools
-#   - pip install -r requirements.txt
-#   - pip install -e .
-#   - pyinstaller drone-deploy.spec --hidden-import=configparser
-#   - 
-
-# when:
-#   branch:
-#   - develop
