@@ -32,9 +32,9 @@ steps:
   when:
     event: tag
 
-- name: x86_64-osx
+- name: x86_64-linux
   platform:
-    os: mac
+    os: linux
     arch: amd64
   image: python:3.7
   commands:
@@ -47,14 +47,29 @@ steps:
   when:
     event: tag
 
-- name: publish
-  image: plugins/github-release
-  settings:
-    api_key:
-      from_secret: repo_api_key
-    files: cli/dist/*
-  when:
-    event: tag
+volumes:
+- name: terraform
+  host:
+    path: /usr/local/bin/terraform
+
+---
+kind: pipeline
+name: os-x
+
+platform:
+  os: mac
+  arch: amd64
+
+steps:
+- name: x86_64-osx
+  image: python:3.7
+  commands:
+  - . cli/venv/bin/activate
+  - make test
+  - make release
+  volumes:
+  - name: terraform
+    path: /usr/local/bin/terraform
 
 trigger:
   branch:
@@ -64,10 +79,6 @@ trigger:
   - push
   - tag
 
-volumes:
-- name: terraform
-  host:
-    path: /usr/local/bin/terraform
 # kine: pipeline
 # name: linux-cli-build
 
