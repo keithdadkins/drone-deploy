@@ -33,6 +33,15 @@ steps:
   when:
     event: tag
 
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: repo_api_key
+    files: cli/dist/drone-deploy.x86_64-linux.tar.gz
+  when:
+    event: tag
+
 volumes:
 - name: terraform
   host:
@@ -76,6 +85,15 @@ steps:
   - make
   - make test
   - make release
+
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: repo_api_key
+    files: cli/dist/drone-deploy.x86_64-osx.tar.gz
+  when:
+    event: tag
 
 trigger:
   event:
