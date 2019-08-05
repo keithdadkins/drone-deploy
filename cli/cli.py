@@ -13,13 +13,6 @@ from drone_deploy import new_deployment, prepare_deployment,\
                          show_agent_command
 
 
-def check_dir():
-    '''ensure we are running in project root'''
-    if not Path('templates').exists():
-        click.echo("drone-deploy must be run from the project root directoy.")
-        sys.exit("Exiting.")
-
-
 def aws_session(aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None,
                 profile_name=None):
     '''
