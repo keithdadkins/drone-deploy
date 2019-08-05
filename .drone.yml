@@ -8,6 +8,7 @@ steps:
 - name: clone
   image: docker:git
   commands:
+  - env
   - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
 
 - name: test-x86_64-linux
