@@ -19,6 +19,7 @@ else
 endif
 
 OSX: pyinstall
+	pip install --upgrade PyGithub
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
 	sync
