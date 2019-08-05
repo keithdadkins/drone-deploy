@@ -22,5 +22,6 @@ def test_aws_session_ctx(runner):
     aws_access_key_id = '1234567890'
     aws_secret_access_key = 'ABCDE1234567890'
     aws = aws_session(aws_access_key_id=aws_access_key_id,
-                      aws_secret_access_key=aws_secret_access_key)
+                      aws_secret_access_key=aws_secret_access_key,
+                      aws_session_token='')
     assert type(aws) is boto3.session.Session, 'aws'
