@@ -1,6 +1,9 @@
 kind: pipeline
 name: default
 
+clone:
+  depth: 1
+
 steps:
 - name: test-x86_64-linux
   image: python:3.7
@@ -60,6 +63,9 @@ trigger:
 kind: pipeline
 type: exec
 name: os-x
+
+clone:
+  depth: 1
 
 platform:
   os: darwin
