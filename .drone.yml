@@ -48,11 +48,11 @@ steps:
   image: docker:git
   commands:
   - git clone -b $DRONE_TAG --depth 1 $DRONE_REPO_LINK
-  - cd drone-deploy
 
 - name: release-x86_64-linux
   image: python:3.7
   commands:
+  - cd drone-deploy
   - . cli/venv/bin/activate
   - make test
   - make release
@@ -65,7 +65,7 @@ steps:
   settings:
     api_key:
       from_secret: repo_api_key
-    files: cli/dist/drone-deploy.x86_64-linux.tar.gz
+    files: drone-deploy/cli/dist/drone-deploy.x86_64-linux.tar.gz
 
 volumes:
 - name: terraform
@@ -93,6 +93,7 @@ clone:
 steps:
 - name: clone
   commands:
+  - env
   - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
   - cd drone-deploy
 
