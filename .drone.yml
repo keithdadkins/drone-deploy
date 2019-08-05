@@ -48,6 +48,7 @@ steps:
   image: docker:git
   commands:
   - git clone -b $DRONE_TAG --depth 1 $DRONE_REPO_LINK
+  - cd drone-deploy
 
 - name: release-x86_64-linux
   image: python:3.7
@@ -93,6 +94,7 @@ steps:
 - name: clone
   commands:
   - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
+  - cd drone-deploy
 
 - name: test-x86_64-osx
   # ensure a recent version of git is installed on osx runner host
