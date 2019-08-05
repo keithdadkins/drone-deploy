@@ -33,6 +33,6 @@ release = repo.get_release(tag)
 asset = release.upload_asset(str(tarball))
 if asset.state == 'uploaded':
     print("uploaded release:")
-    print("/t{asset.browser_download_url}")
+    print(f"/t{asset.browser_download_url}")
 else:
     assert False, "Failed to upload release."

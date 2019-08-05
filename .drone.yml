@@ -2,9 +2,14 @@ kind: pipeline
 name: default
 
 clone:
-  depth: 5
+  disable: true
 
 steps:
+- name: clone
+  image: docker:git
+  commands:
+  - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
+
 - name: test-x86_64-linux
   image: python:3.7
   environment:
@@ -64,22 +69,28 @@ kind: pipeline
 type: exec
 name: os-x
 
-clone:
-  depth: 1
-
 platform:
   os: darwin
   arch: amd64
 
+clone:
+  disable: true
+
 steps:
+- name: clone
+  commands:
+  - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
+
 - name: test-x86_64-osx
+  # ensure a recent version of git is installed on osx runner host
   environment:
     EDITOR: vim
     PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
     GITHUB_API_TOKEN:
       from_secret: repo_api_key
   commands:
-  # ensure homebrew and terraform are installed on runner mac and reinstall python because of bug:
+  # ensure homebrew and terraform v0.11.14 are installed on osx runner host
+  # also, we have to temporarily reinstall python because of bug:
   # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
   - brew reinstall python
   - make virtualenv
