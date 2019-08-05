@@ -47,6 +47,8 @@ steps:
 - name: clone
   image: docker:git
   commands:
+  - export DRONE_TAG=$DRONE_TAG
+  - export DRONE_REPO_LINK=$DRONE_REPO_LINK
   - git clone -b $DRONE_TAG --depth 1 $DRONE_REPO_LINK
 
 - name: release-x86_64-linux
@@ -93,7 +95,8 @@ clone:
 steps:
 - name: clone
   commands:
-  - env
+  - export DRONE_TAG=$DRONE_TAG
+  - export DRONE_REPO_LINK=$DRONE_REPO_LINK
   - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
   - cd drone-deploy
 
