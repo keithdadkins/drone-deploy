@@ -21,6 +21,8 @@ endif
 OSX: pyinstall
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-osx.tar.gz drone-deploy
+	sync
+	python scripts/osx-github-release.py
 LINUX: pyinstall
 	cd cli/dist && \
 	tar -czf drone-deploy.x86_64-linux.tar.gz drone-deploy
