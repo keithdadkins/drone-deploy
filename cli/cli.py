@@ -82,11 +82,14 @@ def cli(ctx, region):
 
     # create an aws session and set it's region. We will pass this around the cli app
     # in the 'ctx' context object.
-    ctx.obj = aws_session(profile_name=profile,
-                          aws_access_key_id=aws_access_key_id,
-                          aws_secret_access_key=aws_secret_access_key,
-                          aws_session_token=aws_session_token)
-    ctx.obj.region = region
+    if ctx.obj is None:
+        ctx.obj = dict()
+
+    ctx.obj['aws'] = aws_session(profile_name=profile,
+                                 aws_access_key_id=aws_access_key_id,
+                                 aws_secret_access_key=aws_secret_access_key,
+                                 aws_session_token=aws_session_token)
+    ctx.obj['aws'].region = region
 
 
 @cli.command()
