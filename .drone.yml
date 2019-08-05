@@ -49,7 +49,7 @@ steps:
   commands:
   - export DRONE_TAG=$DRONE_TAG
   - export DRONE_REPO_LINK=$DRONE_REPO_LINK
-  - git clone -b $DRONE_TAG --depth 1 $DRONE_REPO_LINK
+  - git clone -b "${DRONE_TAG}" --depth 1 $DRONE_REPO_LINK
 
 - name: release-x86_64-linux
   image: python:3.7
@@ -97,8 +97,7 @@ steps:
   commands:
   - export DRONE_TAG=$DRONE_TAG
   - export DRONE_REPO_LINK=$DRONE_REPO_LINK
-  - git clone -b '$DRONE_TAG' --depth 1 $DRONE_REPO_LINK
-  - cd drone-deploy
+  - git clone -b "${DRONE_TAG}" --depth 1 $DRONE_REPO_LINK
 
 - name: test-x86_64-osx
   # ensure a recent version of git is installed on osx runner host
@@ -111,6 +110,7 @@ steps:
   # ensure homebrew and terraform v0.11.14 are installed on osx runner host
   # also, we have to temporarily reinstall python because of bug:
   # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
+  - cd drone-deploy
   - brew reinstall python
   - make virtualenv
   - make venv
@@ -124,6 +124,7 @@ steps:
     GITHUB_API_TOKEN:
       from_secret: repo_api_key
   commands:
+  - cd drone-deploy
   - . cli/venv/bin/activate
   - make release
 
