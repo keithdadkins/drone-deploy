@@ -68,7 +68,6 @@ platform:
 
 steps:
 - name: test-x86_64-osx
-  image: python:3.7
   environment:
     EDITOR: vim
     PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
@@ -84,16 +83,15 @@ steps:
   - . cli/venv/bin/activate
   - make
   - make test
-  - make release
 
-- name: publish
-  image: plugins/github-release
-  settings:
-    api_key:
+- name: publish-osx
+  environment:
+    PATH: /usr/local/opt/python/libexec/bin:/usr/local/bin:$PATH
+    GITHUB_API_TOKEN:
       from_secret: repo_api_key
-    files: cli/dist/drone-deploy.x86_64-osx.tar.gz
-  when:
-    event: tag
+  commands:
+  - . cli/venv/bin/activate
+  - make release
 
 trigger:
   event:
