@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 clone:
-  depth: 1
+  depth: 5
 
 steps:
 - name: test-x86_64-linux
@@ -20,47 +20,17 @@ steps:
   - make
   - make coverage
 
-volumes:
-- name: terraform
-  host:
-    path: /usr/local/bin/terraform
-
-trigger:
-  branch:
-  - master
-  - develop
-  event:
-  - push
-
----
-kind: pipeline
-name: release-linux
-
-platform:
-  os: linux
-  arch: amd64
-
-clone:
-  disable: true
-
-steps:
-- name: clone
-  image: docker:git
-  commands:
-  - export DRONE_TAG=$DRONE_TAG
-  - export DRONE_REPO_LINK=$DRONE_REPO_LINK
-  - git clone -b "${DRONE_TAG}" --depth 1 $DRONE_REPO_LINK
-
 - name: release-x86_64-linux
   image: python:3.7
   commands:
-  - cd drone-deploy
   - . cli/venv/bin/activate
   - make test
   - make release
   volumes:
   - name: terraform
     path: /usr/local/bin/terraform
+  when:
+    event: tag
 
 - name: publish
   image: plugins/github-release
@@ -68,6 +38,8 @@ steps:
     api_key:
       from_secret: repo_api_key
     files: drone-deploy/cli/dist/drone-deploy.x86_64-linux.tar.gz
+  when:
+    event: tag
 
 volumes:
 - name: terraform
@@ -76,7 +48,11 @@ volumes:
 
 
 trigger:
+  branch:
+  - master
+  - develop
   event:
+  - push
   - tag
 
 ---
