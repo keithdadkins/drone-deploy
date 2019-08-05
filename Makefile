@@ -73,11 +73,21 @@ smoketest:
 	pytest --rootdir=cli -k "smoke" -vv cli/tests
 
 test:
+	# create a .env file if not present
 	$(shell [ ! -f .env ] && cp .env.example .env)
+
+	# setup an aws profile if not present
+	$(shell [ ! -d ~/.aws] && mkdir -p ~/.aws)
+	$(shell [ ! -f ~/.aws/config ] && echo "[default]\nregion = us-east-5" > ~/.aws/config)
 	pytest --rootdir=cli cli/tests
 
 coverage:
+	# create a .env file if not present
 	$(shell [ ! -f .env ] && cp .env.example .env)
+
+	# setup an aws profile if not present
+	$(shell [ ! -d ~/.aws] && mkdir -p ~/.aws)
+	$(shell [ ! -f ~/.aws/config ] && echo "[default]\nregion = us-east-5" > ~/.aws/config)
 	pytest --rootdir=cli --cov=cli --cov-config=.coveragerc cli/tests
 
 clean:
