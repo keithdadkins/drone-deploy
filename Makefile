@@ -73,9 +73,11 @@ smoketest:
 	pytest --rootdir=cli -k "smoke" -vv cli/tests
 
 test:
+	$(shell [ ! -f .env ] && cp .env.example .env)
 	pytest --rootdir=cli cli/tests
 
 coverage:
+	$(shell [ ! -f .env ] && cp .env.example .env)
 	pytest --rootdir=cli --cov=cli --cov-config=.coveragerc cli/tests
 
 clean:
