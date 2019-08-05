@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 clone:
-  depth: 1
+  depth: 5
 
 steps:
 - name: test-x86_64-linux
