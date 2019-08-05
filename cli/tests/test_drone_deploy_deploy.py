@@ -1,5 +1,5 @@
-import subprocess
 from cli import cli
+import subprocess
 
 
 def test_cli_deploy(runner, new_deployment, mocker):

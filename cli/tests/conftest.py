@@ -78,6 +78,13 @@ def new_deployment(runner):
 
 
 @pytest.fixture(scope='session')
+def new_deployment2(runner):
+    # create a new deployment 'bar'
+    result = runner.invoke(cli, ["new", "bar"])
+    return result
+
+
+@pytest.fixture(scope='session')
 def runner():
     # create, setup, and move to the test deployment directory
     test_dir = setup_test_dir()

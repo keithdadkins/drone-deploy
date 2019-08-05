@@ -1,26 +1,12 @@
 import click
 from pathlib import Path
 from drone_deploy.deployment import Deployment
-
-
-def list_deployments(ctx, args, incomplete):
-    """
-    Display list of deployments for bash autocompletion
-    """
-    deployments = []
-    try:
-        deployment_dir = Path.cwd().joinpath('deployments').resolve()
-        for deployment in deployment_dir.glob(f'{incomplete}*'):
-            if deployment.is_dir():
-                deployments.append(click.echo(deployment.name))
-        return [k for k in deployments if incomplete in k]
-    except Exception:
-        return ""
+from drone_deploy.filter import filter_deployments
 
 
 # $> drone-deploy prepare [deployment name]
 @click.group(invoke_without_command=True, name="prepare")
-@click.argument('deployment_name', type=click.STRING, autocompletion=list_deployments)
+@click.argument('deployment_name', type=click.STRING, autocompletion=filter_deployments)
 def prepare_deployment(deployment_name):
     """
     Sets up and prepares the deployment. Specifically, it runs 'terraform init'

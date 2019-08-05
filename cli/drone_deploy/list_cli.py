@@ -1,6 +1,7 @@
 import click
 from pathlib import Path
 
+
 # $> drone-deploy list
 @click.group(invoke_without_command=True, name="list")
 def list_deployments():

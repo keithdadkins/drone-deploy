@@ -5,6 +5,5 @@ omit =
     */tests/*
     */docs/*
     */dist/*
-    setup.py
-    scratch*.py
-
+    cli/setup.py
+    cli/scratch*.py

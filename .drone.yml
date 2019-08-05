@@ -23,7 +23,6 @@ steps:
     arch: amd64
   image: python:3.7
   commands:
-  - env
   - . cli/venv/bin/activate
   - make test
   - make release
@@ -76,7 +75,6 @@ steps:
   commands:
   # ensure homebrew and terraform are installed on runner mac and reinstall python because of bug:
   # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
-  - env
   - brew reinstall python
   - make virtualenv
   - make venv
