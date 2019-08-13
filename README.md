@@ -4,7 +4,7 @@
 
 __STATUS:__ This project is a work in progress and is in a pre-release state.
 
-This project builds a command-line application used for spinning up stand-alone [Drone CI](https://drone.io) servers on AWS. If you are an admin looking for a quick way to spin up one or more drone servers, and are comfortable with the cli, and have an AWS account with Route53 domain, then this may be useful to you.
+`drone-deploy` is a cli app used for spinning up [Drone CI](https://drone.io) servers on AWS. If you are an admin looking for a quick way to spin up one or more drone servers, and are comfortable with the cli, and have an AWS account with Route53 domain, then this may be useful to you.
 
 __See it in action__
 
@@ -22,31 +22,26 @@ In short, `drone-deploy` app:
 
 I originally wrote this tool for a client so we could research and explore Drone - an inexpensive and easy way to self-host a cross-platform distributed CI/CD system. Basically, it's an altertative to Jenkins, Travis, that uses docker containers as build steps. Pretty neat.
 
-Cost is cheap. For example, running [drone.keithdadkins.me](https://drone.keithdadkins.me) cost me around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents; But, since [anything running docker can become a build agent](TODO) it's trivial to add more nodes. There's also non-docker agents available for Mac, PC, Android, and other platforms as well.
+Cost is cheap. For example, running [drone.keithdadkins.me](https://drone.keithdadkins.me) cost me around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents. But [anything running docker can become a build agent](TODO) so it's trivial to add more agents. There's also non-docker agents available for Mac, PC, Android, and other platforms as well.
 
 
 ## Requirements 
 
 __Requirements for building the `drone-deploy` cli app__
 
-* (Docker)[https://www.docker.com/products/docker-desktop]
-* (Python 3)[https://realpython.com/installing-python/]
-* (Terraform v0.11.14)[https://learn.hashicorp.com/terraform/getting-started/install]
+* [Docker](https://www.docker.com/products/docker-desktop)
+* [Python 3](https://realpython.com/installing-python/)
+* [Terraform v0.11.14](https://learn.hashicorp.com/terraform/getting-started/install)
 * Either have AWS cli tools installed or have secrets exported as env vars (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, etc)
 
 
 __Requirements for running `drone-deploy` from release__
 
 * Either have AWS cli tools installed or have secrets exported as env vars (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, etc)
-* (Docker)[https://www.docker.com/products/docker-desktop] for building the AMI
-* (Terraform v0.11.14)[https://learn.hashicorp.com/terraform/getting-started/install] for deploying resources.
+* [Docker](https://www.docker.com/products/docker-desktop) for building the AMI
+* [Terraform v0.11.14](https://learn.hashicorp.com/terraform/getting-started/install) for deploying resources.
 
-** `drone-deploy` has been built and tested on recent linux and mac-osx machines only.
 
-## Building the CLI
+## Using `drone-deploy`
 
-Please refer to the __[drone-deploy development guide](./drone-deploy-user-guide.md)__ in the `docs` directory for more information on how to use `drone-deploy`.
-
-## Contributions
-
-Feel free to fork and send pull-requests if you find this project useful, but unless there is interest in the project from others future development will be limited.
+Please refer to the __[drone-deploy user guide](docs/drone-deploy-user-guide.md)__ for more info.
