@@ -42,6 +42,8 @@ __Requirements for running `drone-deploy` from release__
 * [Terraform v0.11.14](https://learn.hashicorp.com/terraform/getting-started/install) for deploying resources.
 
 
-## Using `drone-deploy`
-
-Please refer to the __[drone-deploy user guide](docs/drone-deploy-user-guide.md)__ for more info.
+## Docs
+DOC | Location
+----|----------
+User Guide | [docs/drone-deploy user guide](docs/drone-deploy-user-guide.md)
+Developer Guide | [docs/drone-deploy developer guide](docs/drone-deploy-developer-guide.md)
