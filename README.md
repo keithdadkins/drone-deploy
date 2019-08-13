@@ -4,7 +4,7 @@
 
 __STATUS:__ This project is a work in progress and is in a pre-release state.
 
-`drone-deploy` is a cli app used for spinning up [Drone CI](https://drone.io) servers on AWS. If you are an admin looking for a quick way to spin up one or more drone servers, and are comfortable with the cli, and have an AWS account with Route53 domain, then this may be useful to you.
+`drone-deploy` is a command line application used for spinning up [Drone CI](https://drone.io) servers on AWS. If you are an admin looking for a quick way to spin up one or more drone servers, and are comfortable with the cli, and have an AWS account with Route53 domain, then this may be useful to you.
 
 __See it in action__
 
