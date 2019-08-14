@@ -22,7 +22,7 @@ In short, `drone-deploy` app:
 
 I originally wrote this tool for a client so we could research and explore Drone - an inexpensive and easy way to self-host a cross-platform distributed CI/CD system. Basically, it's an altertative to Jenkins, Travis, that uses docker containers as build steps. Pretty neat.
 
-Cost is cheap. For example, running [drone.keithdadkins.me](https://drone.keithdadkins.me) cost me around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents. But [anything running docker can become a build agent](TODO) so it's trivial to add more agents. There's also non-docker agents available for Mac, PC, Android, and other platforms as well.
+Cost is cheap. For example, running [drone.keithdadkins.me](https://drone.keithdadkins.me/keithdadkins/drone-deploy/) cost me around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents. But [anything running docker can become a build agent](TODO) so it's trivial to add more agents. There's also non-docker agents available for Mac, PC, Android, and other platforms as well.
 
 
 ## Requirements 
