@@ -11,3 +11,4 @@ python-dotenv==0.10.3
 PyYAML==5.1.2
 ruamel.yaml==0.16.0
 wheel==0.33.4
+requests
