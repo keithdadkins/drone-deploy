@@ -96,3 +96,13 @@ def runner():
 
     # teardown when down
     teardown_test_dir(test_dir)
+
+
+@pytest.fixture(scope='session')
+def deployments_dir():
+    '''returns a Path to an empty 'deployments' dir for testing init'''
+    deployments_dir = Path.cwd().joinpath('cli', 'tests', 'deployments')
+    if deployments_dir.exists():
+        shutil.rmtree(deployments_dir)
+
+    return deployments_dir

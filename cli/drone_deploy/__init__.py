@@ -9,3 +9,4 @@ from .show_cli import show                              # noqa
 from .plan_cli import plan                              # noqa
 from .destroy_cli import destroy                        # noqa
 from .show_agent_command_cli import show_agent_command  # noqa
+from .init_cli import init_dir                          # noqa

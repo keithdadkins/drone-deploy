@@ -11,13 +11,11 @@ def deploy(deployment_name):
     """
     Deploys (runs 'terraform apply') on <deployment_name> resources.
 
-    The <deployment-name> must exist in the ./deployments directory.
+    The <deployment-name> must exist in the $(PWD)/deployments directory.
 
     Usage:
-        drone-deploy deploy drone.mydomain.com
+        `drone-deploy deploy drone.yourroute53domain.com`
 
-    Related:
-        drone-deploy [new, prepare, list, show, plan]
     """
 
     deployment_dir = Path.cwd().joinpath('deployments', deployment_name, 'config.yaml').resolve()
