@@ -1,5 +1,4 @@
 import os
-import sys
 import click
 from version import __version__
 from pathlib import Path
@@ -19,6 +18,7 @@ def cli(ctx):
     """
     pass
 
+
 @cli.command()
 def version():
     """
@@ -28,12 +28,16 @@ def version():
 
 
 def setup():
-    # make sure we are in project root
-    # check_dir()
-
     # load env vars from .env file. They will be available, along with any other
     # env vars, by using os.getenv("ENV_VAR_NAME") in the project
-    env_path = Path(__file__).parent.joinpath('.env')
+
+    # are we running from release or src? cli.py vs cli.pyc
+    if Path(__file__).name == 'cli.py':
+        # try to load .env from parent dir if running from src
+        env_path = Path(__file__).parent.joinpath('.env')
+    else:
+        # look for .env in the cwd
+        env_path = Path(os.getcwd()).joinpath('.env')
     load_dotenv(dotenv_path=env_path)
 
     # hookup 'drone-deploy' sub commands
@@ -49,5 +53,6 @@ def setup():
     cli.add_command(destroy)
     cli.add_command(show_agent_command)
     cli.add_command(init_dir)
+
 
 setup()
