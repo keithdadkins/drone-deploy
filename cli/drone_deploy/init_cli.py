@@ -78,20 +78,35 @@ def setup_templates(path):
         copy_templates_from_repo(path)
 
 
-def setup_readme(path):
-    print("\tsetting up", path)
+def copy_file_from_templates(name, path):
+    try:
+        src = Path(path).parent.joinpath('templates', f'{name}.template')
+        shutil.copy(src, path)
+        if Path(path).exists():
+            click.echo(f"\tgenerated {name}")
+    except FileNotFoundError:
+        click.echo(click.style(f"\tcouldn't find {name} in {src.parent}... skipping",
+                   fg='yellow'))
+    except Exception as e:
+        print(type(e))
+        print(e.args)
+        print(e)
 
 
-def setup_gitignore(path):
-    print("\tsetting up", path)
+def copy_readme(path):
+    copy_file_from_templates('README.md', path)
+
+
+def copy_gitignore(path):
+    copy_file_from_templates('.gitignore', path)
 
 
 def setup_init_item(item, path):
     items = {
         'deployments': setup_deployments,
         'templates': setup_templates,
-        'README.txt': setup_readme,
-        '.gitignore': setup_gitignore
+        'README.md': copy_readme,
+        '.gitignore': copy_gitignore
     }
     switcher = items.get(item)
     switcher(path)
@@ -138,7 +153,7 @@ def init_dir(path):
     # resolve the deployment path (tilde's are expanded before now so resolve any symlinks, etc.)
     base_path = Path(path).resolve()
     folders = ['deployments', 'templates']
-    files = ['.gitignore', 'README.txt']
+    files = ['.gitignore', 'README.md']
     click.echo(click.style(f"Initializing...", bold=True))
     # stop init if any of the folders exist, else create them
     for folder in folders:
@@ -162,9 +177,8 @@ def init_dir(path):
         else:
             setup_init_item(file, file_path)
 
-    click.echo(click.style(f"Successfully initialized {path}", fg='green'))
+    click.echo(f"Successfully initialized {path}")
     if Path(os.getcwd()).resolve() != path.resolve():
         click.echo(
-            click.style("*** "
-                        f"Don't forget to cd into {Path(path).name} before creating deployments."
-                        " ***", bold=True))
+            click.style(f"*** Don't forget to cd into the {Path(path).name} directory before"
+                        " creating deployments. ***", bold=True))

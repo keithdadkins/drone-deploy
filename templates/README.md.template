@@ -1,0 +1,22 @@
+# drone-deployments
+
+This folder was automatically generated with [`drone-deploy`](https://github.com/keithdadkins/drone-deploy). You can find the [latest release here](https://github.com/keithdadkins/drone-deploy/releases).
+
+`drone-deploy` looks for its deployments and templates relative to where it is run from. Therefore, please `cd` into this directory before running commands.
+
+__!!! IMPORTANT !!!__
+
+It's recommended that you commit this directory to source control, but keep in mind that it will contain your drone deployments terraform state which may contain sensitive data. A `.gitignore` file was automatically generated to help prevent accidentally commiting sensitive items, but it's up to you to review and know what you are committing.
+
+__terraform state__
+By default, the .gitignore file ignores tfstate as it may contain sensitive data. And as a best-practice, it is recommended that you store terraform state in [terraform backends](https://www.terraform.io/docs/backends/) which is out of scope of this project. If you do not have backends setup and still want to commit state, then it's up to you to uncomment the tfstate sections of the .gitignore file.
+
+## deployments directory
+
+The `deployments` directory contains deployments created with `drone-deploy new <name>`. Where the name of the folder is `<name>`.
+
+Deployments are generated using the various scripts and terraform files found in `templates`. Once generated, you can edit the deployments as needed and either use `drone-deploy` to manage the deployment or by running `terraform` commands manually.
+
+## templates directory
+
+The `templates` directory contains build-scripts and packer templates used for building the drone server AMI (Amazon Machine Image), as well as the `terraform` templates used for managing AWS resources.
