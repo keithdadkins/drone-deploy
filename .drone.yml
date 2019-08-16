@@ -103,6 +103,7 @@ steps:
   - cd drone-deploy
   - . cli/venv/bin/activate
   - make release
+  - python scripts/osx-github-release.py
 
 trigger:
   event:
