@@ -32,10 +32,6 @@ def terraform_cmd():
 
         # pass our env vars along to the sub process when executed
         env = os.environ
-        ## print out exportable list of variables for debugging
-        # vars = [k for k in env if 'TF_VAR_' in k or 'DRONE_' in k]
-        # for k in vars:
-        #     print(f'export {k}="{env[k]}"')
         p = subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, text=True,
                              cwd=working_dir, env=env)
         while True:

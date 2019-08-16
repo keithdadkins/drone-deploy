@@ -58,8 +58,6 @@ def copy_templates_from_repo(path):
 
     # cleanup
     shutil.rmtree(tempdir)
-
-    # TODO: verify
     click.echo(f"\tdownloaded templates to {path}")
 
 
@@ -72,7 +70,6 @@ def setup_templates(path):
         templates_dir = Path(__file__).parent.parent.parent.joinpath('templates')
         if templates_dir.exists():
             shutil.copytree(templates_dir, path)
-        # TODO: verify
         click.echo(f"\tcopied templates to {path}")
     else:
         copy_templates_from_repo(path)
@@ -114,7 +111,7 @@ def setup_init_item(item, path):
 
 @click.group(invoke_without_command=True, name="init")
 @click.argument('path', type=click.Path(file_okay=False, writable=True),
-                default=Path(os.getcwd()).joinpath('drone-deployments'))
+                default=Path.cwd().joinpath('drone-deployments'))
 def init_dir(path):
     """
     Initializes a new or existing 'deployments' working-directory by
@@ -178,7 +175,7 @@ def init_dir(path):
             setup_init_item(file, file_path)
 
     click.echo(f"Successfully initialized {path}")
-    if Path(os.getcwd()).resolve() != path.resolve():
+    if Path.cwd().resolve() != Path(path).resolve():
         click.echo(
             click.style(f"*** Don't forget to cd into the {Path(path).name} directory before"
                         " creating deployments. ***", bold=True))
