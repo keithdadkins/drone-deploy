@@ -37,7 +37,14 @@ steps:
   settings:
     api_key:
       from_secret: repo_api_key
-    files: drone-deploy/cli/dist/drone-deploy.x86_64-linux.tar.gz
+    files: cli/dist/drone-deploy.x86_64-linux.tar.gz
+    checksum:
+      - md5
+      - sha1
+      - sha256
+      - sha512
+      - adler32
+      - crc32
   when:
     event: tag
 
