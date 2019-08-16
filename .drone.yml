@@ -94,7 +94,8 @@ steps:
   # also, we have to temporarily reinstall python because of bug:
   # https://discourse.brew.sh/t/pip-install-upgrade-pip-breaks-pip-when-installed-with-homebrew/5338
   - cd drone-deploy
-  - brew reinstall python
+  - brew update && brew upgrade
+  - brew reinstall python3
   - make virtualenv
   - make venv
   - . cli/venv/bin/activate
