@@ -114,5 +114,7 @@ steps:
   - python scripts/osx-github-release.py
 
 trigger:
+  branch:
+  - master
   event:
   - tag
