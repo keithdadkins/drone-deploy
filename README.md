@@ -1,4 +1,4 @@
-[![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone-deploy/status.svg?ref=refs/heads/master)](https://drone.keithdadkins.me/keithdadkins/drone-deploy)
+![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone-deploy/status.svg?ref=refs/heads/master) ![license](https://img.shields.io/github/license/keithdadkins/drone-deploy) ![release](https://img.shields.io/github/release/keithdadkins/drone-deploy)
 
 # Drone CI AWS EC2 deployer
 
