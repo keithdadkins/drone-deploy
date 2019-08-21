@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import subprocess
+from pathlib import Path
 
 
 class Terraform():
@@ -43,7 +44,7 @@ class Terraform():
     """
     SUPPORTED_TF_VERSION = 'Terraform v0.11.14'
     TERRAFORM_VERSION_MSG = f"""
-    {SUPPORTED_TF_VERSION} is the only version of Terraform currently supported for now, as
+    {SUPPORTED_TF_VERSION} is the only version of Terraform currently supported because
     terraform underwent a major upgrade (v11 -> v12) during development which introduced
     breaking changes in the TF configuration language.
 
@@ -65,13 +66,35 @@ class Terraform():
         Define a class method to proxy terraform.
         '''
         def terraform(command, tf_targets=None, tf_args=None):
-            if tf_targets:
-                command = f"terraform {command} {tf_targets}"
-            else:
-                command = f"terraform {command}"
+            # set flags and base command
+            tfverbose = False
+            tfout = False
+            tfplan = False
+            tfplanfile = Path(self.working_dir).joinpath('tfplan')
+            tfpostmsg = ""
+            if command == 'plan':
+                tfout = True
+                tfpostmsg = "To apply these exact changes, run `drone-deploy deploy`."
+            if command in ['apply']:
+                if tfplanfile.exists():
+                    tfplan = True
+            command = f"TF_IN_AUTOMATION={tfverbose} terraform {command}"
 
+            # append -out=file if set
+            if tfout:
+                command = f"{command} -out=tfplan"
+
+            # append targets if present
+            if tf_targets:
+                command = f"{command} {tf_targets}"
+
+            # append args if present
             if tf_args:
                 command = f"{command} {tf_args}"
+
+            # use plan file if present
+            if tfplan:
+                command = f"{command} tfplan"
 
             # pass our env vars along to the sub process when executed
             env = os.environ
@@ -84,15 +107,16 @@ class Terraform():
                 if out != '':
                     sys.stdout.write(out)
                     sys.stdout.flush()
+            if tfpostmsg:
+                print(f"\n{tfpostmsg}\n")
+
             # check for errors
             if p.returncode != 0:
                 # check for valid terraform version
-                print("Terraform version check... ")
+                print("Something went wrong running terraform commands... ")
                 current_ver = subprocess.call(["terraform", "version"])
                 if current_ver != self.SUPPORTED_TF_VERSION:
                     print(self.TERRAFORM_VERSION_MSG)
-
-                # TODO: handle any other terraform errors
 
         self.terraform = terraform
 
@@ -104,7 +128,7 @@ class Terraform():
 
     @tf_vars.setter
     def tf_vars(self, tf_vars):
-        # unpacks tf vars (a list of tuples) into a dict
+        # unpacks tf vars
         self.__tf_vars = {k: v for k, v in tf_vars}
 
     @property

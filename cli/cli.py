@@ -41,18 +41,12 @@ def setup():
     load_dotenv(dotenv_path=env_path)
 
     # hookup 'drone-deploy' sub commands
-    # cli.add_command(bootstrap)
-    cli.add_command(new_deployment)
-    cli.add_command(edit_deployment)
-    cli.add_command(prepare_deployment)
-    cli.add_command(build_ami)
-    cli.add_command(list_deployments)
-    cli.add_command(show)
-    cli.add_command(plan)
-    cli.add_command(deploy)
-    cli.add_command(destroy)
-    cli.add_command(show_agent_command)
-    cli.add_command(init_dir)
+    sub_commands = [new_deployment, edit_deployment, prepare_deployment,
+                    build_ami, list_deployments, show, plan, destroy,
+                    show_agent_command, deploy, init_dir]
+
+    for command in sub_commands:
+        cli.add_command(command)
 
 
 setup()

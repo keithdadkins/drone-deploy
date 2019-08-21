@@ -5,8 +5,8 @@ import drone_deploy
 from cli import cli
 from pathlib import Path, PosixPath
 from click.testing import CliRunner
-from drone_deploy.init_cli import setup_templates as cli_setup_templates, \
-                                  copy_file_from_templates
+from drone_deploy.init_cli import setup_templates as cli_setup_templates
+
 
 @pytest.fixture()
 def init_runner():
@@ -74,14 +74,13 @@ def test_cli_init_with_cwd(init_runner):
     # run init on .
     result = init_runner.invoke(cli, ["init", "."])
     assert result.exit_code == 0, "'drone-deploy init .' exited with a non-zero status."
-     # check folders
+    # check folders
     folders = ['deployments', 'templates']
     for folder in folders:
         if new_dir.joinpath(folder).exists():
             assert True
         else:
             assert False, f"'drone-deploy init .' failed to create {folder}."
-
 
 
 def test_cli_init_does_not_overwrite_data(init_runner):
@@ -104,7 +103,7 @@ def test_cli_init_does_not_overwrite_data(init_runner):
     result = init_runner.invoke(cli, ["init", 'foos-drones2'])
     assert 'deployments\' would be destroyed' in result.output, "'drone-deploy init foos-drones2' may destroy deployments."
     assert drone_deployments.joinpath('deployments').exists() is True, 'drone-deploy destroyed existing deployemts directory.'
-    
+
     # try again (testing templates)
     shutil.rmtree(drone_deployments.joinpath('deployments'))
     result = init_runner.invoke(cli, ["init", 'foos-drones2'])
@@ -130,13 +129,13 @@ def test_setup_templates_from_src(mocker):
     assert shutil.copytree.called is True, 'failed copying templates from source'
     call_args_src = shutil.copytree.call_args_list[0][0][0]
     call_args_dest = shutil.copytree.call_args_list[0][0][1]
-    
+
     # check source and dest
     assert type(call_args_src) and type(call_args_dest) is PosixPath, '"setup_templates" was called with invalid PosixPath'
     src = str(call_args_src).split('/')
     dest = str(call_args_dest).split('/')
     assert src[-1] == 'templates' and dest[-1] == 'setup-templates-test', 'setup_templates did not copy using expected source and destination'
-    
+
     # make sure we didn't call copy_templates_from_repo
     assert drone_deploy.init_cli.copy_templates_from_repo.called is False, 'setup_templates tried to copy from repo'
 
