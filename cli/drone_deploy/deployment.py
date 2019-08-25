@@ -151,41 +151,27 @@ class Deployment():
                     os.environ['DRONE_DEPLOYMENT_NAME'] = f"{self.config_file.parent.name}"
                 else:
                     os.environ['DRONE_DEPLOYMENT_NAME'] = f"drone-{self.config_file.parent.name}"
-        self.__load_param("drone_deployment_name")
-        self.__load_param("drone_aws_region")
-        self.__load_param("drone_vpc_id")
-        self.__load_param("drone_server_machine_name")
-        self.__load_param("drone_server_hosted_zone")
-        self.__load_param("drone_server_key_pair_name")
-        self.__load_param("drone_server_instance_type")
-        self.__load_param("drone_docker_compose_version")
-        self.__load_param("drone_server_allow_http")
-        self.__load_param("drone_server_allow_https")
-        self.__load_param("drone_server_allow_ssh")
-        self.__load_param("drone_open")
-        self.__load_param("drone_admin")
-        self.__load_param("drone_admin_email")
-        self.__load_param("drone_user_filter")
-        self.__load_param("drone_github_server")
-        self.__load_param("drone_github_client_id")
-        self.__load_param("drone_github_client_secret")
-        self.__load_param("drone_agents_enabled")
-        self.__load_param("drone_tls_autocert")
-        self.__load_param("drone_server_proto")
-        self.__load_param("drone_server_host")
-        self.__load_param("drone_cli_version")
-        self.__load_param("drone_server_docker_image")
-        self.__load_param("drone_agent_docker_image")
-        self.__load_param("drone_server_base_ami")
-        self.__load_param("aws_cli_base_image")
-        self.__load_param("drone_rpc_secret")
-        self.__load_param("drone_s3_bucket")
+        
+        # load the bulk of the params
+        stage1_params = ["drone_deployment_name", "drone_aws_region", "drone_vpc_id",
+                         "drone_server_machine_name", "drone_server_hosted_zone",
+                         "drone_server_key_pair_name", "drone_server_instance_type",
+                         "drone_docker_compose_version", "drone_server_allow_http",
+                         "drone_server_allow_https", "drone_server_allow_ssh",
+                         "drone_open", "drone_admin", "drone_admin_email", "drone_user_filter",
+                         "drone_github_server", "drone_github_client_id","drone_github_client_secret",
+                         "drone_agents_enabled", "drone_tls_autocert", "drone_server_proto",
+                         "drone_server_host", "drone_cli_version", "drone_server_docker_image",
+                         "drone_agent_docker_image", "drone_server_base_ami", "aws_cli_base_image",
+                         "drone_rpc_secret", "drone_s3_bucket"]
+        for p in stage1_params:
+            self.__load_param(p)
 
-        # prepare terraform
+        # prepare terraform and load terraform related params
         self.setup_terraform()
         self.__load_param("drone_builder_role_arn")
 
-        # prepare packer
+        # prepare packer and load packer related params
         self.setup_packer()
         self.__load_param("drone_deployment_id")
         self.__load_param("drone_server_ami")
