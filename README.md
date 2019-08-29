@@ -1,4 +1,4 @@
-[![Build Status](https://drone.keithdadkins.me/api/badges/keithdadkins/drone-deploy/status.svg?ref=refs/heads/master)](https://drone.keithdadkins.me/keithdadkins/drone-deploy/) [![license](https://img.shields.io/github/license/keithdadkins/drone-deploy)](https://github.com/keithdadkins/drone-deploy/blob/master/LICENSE) [![release](https://img.shields.io/github/release/keithdadkins/drone-deploy)](https://github.com/keithdadkins/drone-deploy/releases/)
+[![Build Status](https://drone-deploy.keithdadkins.me/api/badges/keithdadkins/drone-deploy/status.svg?ref=refs/heads/master)](https://drone-deploy.keithdadkins.me/keithdadkins/drone-deploy/) [![license](https://img.shields.io/github/license/keithdadkins/drone-deploy)](https://github.com/keithdadkins/drone-deploy/blob/master/LICENSE) [![release](https://img.shields.io/github/release/keithdadkins/drone-deploy)](https://github.com/keithdadkins/drone-deploy/releases/)
 
 # drone-deploy  
 
@@ -24,7 +24,7 @@ In short, `drone-deploy`:
 
 I originally wrote this tool for a client so we could research and explore Drone - an inexpensive and easy way to self-host a cross-platform distributed CI/CD system. Basically, it's an altertative to Jenkins, Travis, or similar that uses docker containers as build steps. Pretty neat.
 
-Cost is cheap. For example, running [drone.keithdadkins.me](https://drone.keithdadkins.me/keithdadkins/drone-deploy/) costs around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents, but [anything running docker can become a build agent](TODO) so it's trivial to add more agents from anywhere. If you need to build outside of the docker imposed linux platform, non-docker agents are available as well (MacOS, Windows, Android, etc).
+Cost is cheap. For example, running [drone-deploy.keithdadkins.me](https://drone-deploy.keithdadkins.me/keithdadkins/drone-deploy/) costs around $5 - $10 a month (US) on a t2.micro instance. I use a few Mac and PC's around my office as build agents, but [anything running docker can become a build agent](TODO) so it's trivial to add more agents from anywhere. If you need to build outside of the docker imposed linux platform, non-docker agents are available as well (MacOS, Windows, Android, etc).
 
 ## Requirements
 
