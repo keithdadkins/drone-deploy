@@ -4,7 +4,7 @@
 
 __A standalone Drone CI deployment tool for AWS.__
 
-__STATUS:__ *This project is a work in progress and is in a pre-release state. It is not ready for any type of production use.*
+__STATUS:__ *This project is not actively maintained and is not ready for any type of production use.*
 
 `drone-deploy` is a (MacOS/Linux) command line application used for spinning up [Drone CI](https://drone.io) servers on AWS. If you are an admin looking for a quick way to deploy and manage one or more drone servers, are comfortable with the cli, and have an AWS account with Route53 domain, then this may be useful to you.
 
